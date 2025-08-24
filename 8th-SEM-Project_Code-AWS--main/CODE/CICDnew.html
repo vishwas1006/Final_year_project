@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI/CD Pipeline Dashboard</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --dark: #34495e;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+            --sidebar-width: 250px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            display: flex;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #2c3e50;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-subtitle {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .sidebar-menu {
+            padding: 15px 0;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .cost-summary {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .total-cost {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .cost-period {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 15px;
+        }
+        
+        .cost-breakdown {
+            margin-top: 15px;
+        }
+        
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .cost-label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .cost-chart {
+            height: 120px;
+            margin-top: 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chart-bar {
+            position: absolute;
+            bottom: 0;
+            width: 8%;
+            background-color: var(--primary);
+            transition: height 0.3s ease;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            color: var(--dark);
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 15px 20px;
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            padding: 20px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s ease;
+        }
+        
+        .stat-card.updating {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            transition: transform 0.2s ease;
+        }
+        
+        .updating .stat-value {
+            transform: scale(1.05);
+        }
+        
+        .stat-title {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+        
+        .stat-trend {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-trend.up {
+            color: var(--success);
+        }
+        
+        .stat-trend.down {
+            color: var(--danger);
+        }
+        
+        .pipeline-list {
+            list-style: none;
+        }
+        
+        .pipeline-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .pipeline-item:last-child {
+            border-bottom: none;
+        }
+        
+        .pipeline-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .pipeline-name {
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        
+        .pipeline-repo {
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .pipeline-cost {
+            color: var(--dark);
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        
+        .pipeline-status {
+            display: flex;
+            align-items: center;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 15px;
+        }
+        
+        .status-success {
+            background-color: rgba(46, 204, 113, 0.15);
+            color: var(--success);
+        }
+        
+        .status-running {
+            background-color: rgba(52, 152, 219, 0.15);
+            color: var(--primary);
+        }
+        
+        .status-failed {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--danger);
+        }
+        
+        .status-pending {
+            background-color: rgba(243, 156, 18, 0.15);
+            color: var(--warning);
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--gray);
+            color: var(--gray);
+        }
+        
+        .btn-outline:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .btn-icon {
+            margin-right: 5px;
+        }
+        
+        .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .build-history {
+            margin-top: 20px;
+        }
+        
+        .history-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .build-number {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .build-info {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: var(--gray);
+        }
+        
+        .build-info span {
+            margin-right: 15px;
+        }
+        
+        .build-duration {
+            background-color: #f5f7fa;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 90%;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            cursor: pointer;
+            font-size: 22px;
+            color: var(--gray);
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2395a5a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
+        
+        .logs-container {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .log-line {
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+        
+        .log-time {
+            color: #95a5a6;
+            margin-right: 10px;
+        }
+        
+        .log-info {
+            color: #3498db;
+        }
+        
+        .log-success {
+            color: #2ecc71;
+        }
+        
+        .log-warning {
+            color: #f39c12;
+        }
+        
+        .log-error {
+            color: #e74c3c;
+        }
+        
+        .pipeline-container {
+            display: block;
+        }
+        
+        .pipeline-container.hidden {
+            display: none;
+        }
+        
+        .cost-breakdown-container {
+            margin-top: 20px;
+        }
+        
+        .cost-breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cost-breakdown-item:last-child {
+            border-bottom: none;
+            font-weight: 600;
+        }
+        
+        .cost-forecast {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .cost-forecast-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .cost-forecast-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .cost-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        
+        .cost-badge-low {
+            background-color: rgba(46, 204, 113, 0.15);
+            color: var(--success);
+        }
+        
+        .cost-badge-medium {
+            background-color: rgba(243, 156, 18, 0.15);
+            color: var(--warning);
+        }
+        
+        .cost-badge-high {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--danger);
+        }
+        
+        .donut-chart-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .donut-chart {
+            width: 150px;
+            height: 150px;
+            position: relative;
+        }
+        
+        .donut-hole {
+            width: 90px;
+            height: 90px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .donut-ring {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: #f5f7fa;
+            clip-path: circle(75px at center);
+            position: relative;
+        }
+        
+        .donut-segment {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            clip-path: polygon(75px 75px, 75px 0, 150px 0, 150px 75px);
+            transform-origin: 75px 75px;
+        }
+        
+        .segment-1 {
+            background-color: var(--primary);
+            transform: rotate(0deg);
+        }
+        
+        .segment-2 {
+            background-color: var(--success);
+            transform: rotate(120deg);
+        }
+        
+        .segment-3 {
+            background-color: var(--warning);
+            transform: rotate(240deg);
+        }
+        
+        .donut-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .donut-subtext {
+            font-size: 12px;
+            color: var(--gray);
+        }
+        
+        .donut-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-left: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+        
+        .slider-container {
+            margin-top: 15px;
+        }
+        
+        .pipeline-size-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--gray);
+        }
+        
+        .cost-estimate {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .cost-alert {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: rgba(231, 76, 60, 0.1);
+            border-left: 4px solid var(--danger);
+            border-radius: 4px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+            
+            .sidebar-title, .sidebar-subtitle, .menu-text, .cost-summary {
+                display: none;
+            }
+            
+            .menu-icon {
+                margin-right: 0;
+            }
+            
+            .main-content {
+                margin-left: 60px;
+                width: calc(100% - 60px);
+            }
+            
+            .quick-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .pipeline-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .pipeline-status {
+                margin-top: 10px;
+            }
+            
+            .action-btns {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">CI/CD Platform</div>
+            <div class="sidebar-subtitle">Cost Management Dashboard</div>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="menu-item active">
+                <span class="menu-icon">📊</span>
+                <span class="menu-text">Dashboard</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">💰</span>
+                <span class="menu-text">Cost Management</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">🔄</span>
+                <span class="menu-text">Pipelines</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">📦</span>
+                <span class="menu-text">Deployments</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">⚙️</span>
+                <span class="menu-text">Settings</span>
+            </div>
+        </div>
+        
+        <div class="cost-summary">
+            <div class="sidebar-title">Cost Summary</div>
+            <div class="total-cost" id="sidebarTotalCost">$547.28</div>
+            <div class="cost-period">This month to date</div>
+            
+            <div class="cost-breakdown">
+                <div class="cost-item">
+                    <span class="cost-label">Computing</span>
+                    <span class="cost-value" id="computingCost">$321.45</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Storage</span>
+                    <span class="cost-value" id="storageCost">$98.20</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Network</span>
+                    <span class="cost-value" id="networkCost">$127.63</span>
+                </div>
+            </div>
+            
+            <div class="cost-chart" id="costChart">
+                <!-- Chart bars will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <header>
+                <h1 class="page-title">CI/CD Pipeline Dashboard</h1>
+                <button class="btn btn-primary" id="newPipelineBtn">
+                    <span class="btn-icon">+</span> New Pipeline
+                </button>
+            </header>
+            
+            <div class="quick-stats">
+                <div class="stat-card">
+                    <div class="stat-title">Active Pipelines</div>
+                    <div class="stat-value" id="activePipelines">12</div>
+                    <div class="stat-trend up" id="activePipelinesTrend">+2 since last month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Success Rate</div>
+                    <div class="stat-value" id="successRate">86%</div>
+                    <div class="stat-trend up" id="successRateTrend">+4% since last month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Monthly Cost</div>
+                    <div class="stat-value" id="monthlyCost">$547.28</div>
+                    <div class="stat-trend up" id="monthlyCostTrend">+$42.15 since last month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Deployments Today</div>
+                    <div class="stat-value" id="deploymentsToday">8</div>
+                    <div class="stat-trend up" id="deploymentsTrend">+2 vs yesterday</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Cost Overview</h2>
+                    <div class="action-btns">
+                        <button class="btn btn-outline btn-sm" id="exportCostBtn">
+                            <span class="btn-icon">↓</span> Export
+                        </button>
+                        <button class="btn btn-outline btn-sm" id="refreshCostBtn">
+                            <span class="btn-icon">⟳</span> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="donut-chart-container">
+                        <div class="donut-chart">
+                            <div class="donut-ring">
+                                <div class="donut-segment segment-1"></div>
+                                <div class="donut-segment segment-2"></div>
+                                <div class="donut-segment segment-3"></div>
+                            </div>
+                            <div class="donut-hole">
+                                <div class="donut-text" id="totalCostText">$547.28</div>
+                                <div class="donut-subtext">Total Cost</div>
+                            </div>
+                        </div>
+                        <div class="donut-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: var(--primary);"></div>
+                                <div>Computing: <strong id="computingCostLegend">$321.45</strong></div>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: var(--success);"></div>
+                                <div>Storage: <strong id="storageCostLegend">$98.20</strong></div>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: var(--warning);"></div>
+                                <div>Network: <strong id="networkCostLegend">$127.63</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cost-breakdown-container">
+                        <div class="cost-breakdown-item">
+                            <div>Pipeline Runtime</div>
+                            <div id="pipelineRuntimeCost">$289.32</div>
+                        </div>
+                        <div class="cost-breakdown-item">
+                            <div>Storage (Artifacts & Logs)</div>
+                            <div id="storageCostBreakdown">$98.20</div>
+                        </div>
+                        <div class="cost-breakdown-item">
+                            <div>Data Transfer</div>
+                            <div id="dataTransferCost">$127.63</div>
+                        </div>
+                        <div class="cost-breakdown-item">
+                            <div>CI Instances</div>
+                            <div id="ciInstancesCost">$32.13</div>
+                        </div>
+                        <div class="cost-breakdown-item">
+                            <div><strong>Total</strong></div>
+                            <div><strong id="totalCostBreakdown">$547.28</strong></div>
+                        </div>
+                    </div>
+                    
+                    <div class="cost-forecast">
+                        <div class="cost-forecast-title">Monthly Forecast</div>
+                        <div class="cost-forecast-value" id="forecastValue">$726.50</div>
+                        <div>Based on current usage patterns, you are projected to spend <strong id="forecastDifference">+$179.22</strong> more by the end of the month.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Pipelines</h2>
+                    <div class="action-btns">
+                        <button class="btn btn-outline btn-sm" id="exportBtn">
+                            <span class="btn-icon">↓</span> Export
+                        </button>
+                        <button class="btn btn-outline btn-sm" id="refreshBtn">
+                            <span class="btn-icon">⟳</span> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="all">All Pipelines</div>
+                        <div class="tab" data-tab="production">Production</div>
+                        <div class="tab" data-tab="staging">Staging</div>
+                        <div class="tab" data-tab="development">Development</div>
+                    </div>
+                    
+                    <div id="allPipelines" class="pipeline-container">
+                        <ul class="pipeline-list" id="pipelineList">
+                            <!-- Pipelines will be populated by JavaScript -->
+                        </ul>
+                    </div>
+                    
+                    <div id="productionPipelines" class="pipeline-container hidden">
+                        <ul class="pipeline-list" id="productionPipelineList">
+                            <!-- Production Pipelines will be populated by JavaScript -->
+                        </ul>
+                    </div>
+                    
+                    <div id="stagingPipelines" class="pipeline-container hidden">
+                        <ul class="pipeline-list" id="stagingPipelineList">
+                            <!-- Staging Pipelines will be populated by JavaScript -->
+                        </ul>
+                    </div>
+                    
+                    <div id="developmentPipelines" class="pipeline-container hidden">
+                        <ul class="pipeline-list" id="developmentPipelineList">
+                            <!-- Development Pipelines will be populated by JavaScript -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-header">
+                <h2 class="card-title">Recent Builds</h2>
+                <div class="action-btns">
+                    <button class="btn btn-outline btn-sm" id="viewAllBuildsBtn">
+                        <span class="btn-icon">👁️</span> View All
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="build-history" id="buildHistory">
+                    <!-- Build history will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Pipeline Modal -->
+<div class="modal-backdrop" id="newPipelineModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Create New Pipeline</h3>
+            <span class="modal-close" id="closeNewPipelineModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label" for="pipelineName">Pipeline Name</label>
+                <input type="text" class="form-control" id="pipelineName" placeholder="Enter pipeline name">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="repositoryUrl">Repository URL</label>
+                <input type="text" class="form-control" id="repositoryUrl" placeholder="https://github.com/username/repository">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="branchName">Branch Name</label>
+                <input type="text" class="form-control" id="branchName" placeholder="main">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="environment">Environment</label>
+                <select class="form-control" id="environment">
+                    <option value="production">Production</option>
+                    <option value="staging">Staging</option>
+                    <option value="development">Development</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pipeline Size</label>
+                <div class="slider-container">
+                    <input type="range" min="1" max="10" value="5" class="pipeline-size-slider" id="pipelineSizeSlider">
+                    <div class="slider-labels">
+                        <span>Small</span>
+                        <span>Medium</span>
+                        <span>Large</span>
+                    </div>
+                </div>
+                <div class="cost-estimate" id="costEstimate">Estimated Cost: $0.12 per run</div>
+                <div class="cost-alert" id="costAlert">
+                    Warning: This pipeline configuration may lead to high costs.
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="cancelNewPipeline">Cancel</button>
+            <button class="btn btn-primary" id="createNewPipeline">Create Pipeline</button>
+        </div>
+    </div>
+</div>
+
+<!-- Build Logs Modal -->
+<div class="modal-backdrop" id="buildLogsModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="buildLogsTitle">Build Logs: #12345</h3>
+            <span class="modal-close" id="closeBuildLogsModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="logs-container" id="buildLogs">
+                <!-- Logs will be populated by JavaScript -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="downloadLogs">Download Logs</button>
+            <button class="btn btn-primary" id="closeLogs">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize the dashboard functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sample data for pipelines
+        const pipelines = [
+            {
+                id: 1,
+                name: "Website Frontend",
+                repo: "frontend/main-site",
+                status: "success",
+                cost: "$12.45",
+                environment: "production"
+            },
+            {
+                id: 2,
+                name: "API Backend",
+                repo: "backend/api-service",
+                status: "running",
+                cost: "$8.32",
+                environment: "production"
+            },
+            {
+                id: 3,
+                name: "Mobile App CI",
+                repo: "mobile/ios-app",
+                status: "failed",
+                cost: "$5.67",
+                environment: "staging"
+            },
+            {
+                id: 4,
+                name: "Data Pipeline",
+                repo: "data/etl-jobs",
+                status: "pending",
+                cost: "$0.00",
+                environment: "development"
+            },
+            {
+                id: 5,
+                name: "Admin Dashboard",
+                repo: "frontend/admin-panel",
+                status: "success",
+                cost: "$7.89",
+                environment: "staging"
+            }
+        ];
+        
+        // Sample build history data
+        const buildHistory = [
+            {
+                id: "build-12345",
+                number: "#12345",
+                pipeline: "Website Frontend",
+                branch: "main",
+                commit: "a1b2c3d",
+                author: "User Doe",
+                status: "success",
+                duration: "3m 42s",
+                timestamp: "2 hours ago"
+            },
+            {
+                id: "build-12344",
+                number: "#12344",
+                pipeline: "API Backend",
+                branch: "feature/auth",
+                commit: "e4f5g6h",
+                author: "Jane Smith",
+                status: "running",
+                duration: "5m 18s running",
+                timestamp: "3 hours ago"
+            },
+            {
+                id: "build-12343",
+                number: "#12343",
+                pipeline: "Mobile App CI",
+                branch: "fix/crash-bug",
+                commit: "i7j8k9l",
+                author: "Mike Userson",
+                status: "failed",
+                duration: "2m 15s",
+                timestamp: "5 hours ago"
+            }
+        ];
+        
+        // Sample logs data
+        const buildLogs = [
+            { time: "10:15:32", type: "info", message: "Starting build process..." },
+            { time: "10:15:33", type: "info", message: "Cloning repository..." },
+            { time: "10:15:45", type: "success", message: "Repository cloned successfully." },
+            { time: "10:15:46", type: "info", message: "Installing dependencies..." },
+            { time: "10:16:32", type: "success", message: "Dependencies installed successfully." },
+            { time: "10:16:33", type: "info", message: "Running tests..." },
+            { time: "10:17:45", type: "warning", message: "Warning: Deprecated API usage detected." },
+            { time: "10:18:20", type: "success", message: "Tests passed successfully." },
+            { time: "10:18:21", type: "info", message: "Building application..." },
+            { time: "10:19:30", type: "success", message: "Application built successfully." },
+            { time: "10:19:31", type: "info", message: "Deploying to production..." },
+            { time: "10:20:15", type: "success", message: "Deployment completed successfully." },
+            { time: "10:20:16", type: "info", message: "Running post-deployment checks..." },
+            { time: "10:20:45", type: "success", message: "All checks passed." },
+            { time: "10:20:46", type: "info", message: "Build process completed." }
+        ];
+        
+        // Populate pipeline lists
+        function populatePipelines() {
+            const allList = document.getElementById('pipelineList');
+            const productionList = document.getElementById('productionPipelineList');
+            const stagingList = document.getElementById('stagingPipelineList');
+            const developmentList = document.getElementById('developmentPipelineList');
+            
+            // Clear lists
+            allList.innerHTML = '';
+            productionList.innerHTML = '';
+            stagingList.innerHTML = '';
+            developmentList.innerHTML = '';
+            
+            // Populate lists
+            pipelines.forEach(pipeline => {
+                const listItem = createPipelineItem(pipeline);
+                allList.appendChild(listItem.cloneNode(true));
+                
+                if (pipeline.environment === 'production') {
+                    productionList.appendChild(listItem.cloneNode(true));
+                } else if (pipeline.environment === 'staging') {
+                    stagingList.appendChild(listItem.cloneNode(true));
+                } else if (pipeline.environment === 'development') {
+                    developmentList.appendChild(listItem.cloneNode(true));
+                }
+            });
+            
+            // Add event listeners to buttons
+            document.querySelectorAll('.view-logs-btn').forEach(btn => {
+                btn.addEventListener('click', () => showBuildLogs());
+            });
+        }
+        
+        // Create pipeline list item
+        function createPipelineItem(pipeline) {
+            const li = document.createElement('li');
+            li.className = 'pipeline-item';
+            
+            let statusClass = '';
+            switch (pipeline.status) {
+                case 'success': statusClass = 'status-success'; break;
+                case 'running': statusClass = 'status-running'; break;
+                case 'failed': statusClass = 'status-failed'; break;
+                case 'pending': statusClass = 'status-pending'; break;
+            }
+            
+            li.innerHTML = `
+                <div class="pipeline-info">
+                    <div>
+                        <span class="pipeline-name">${pipeline.name}</span>
+                        <span class="pipeline-repo">${pipeline.repo}</span>
+                    </div>
+                    <div class="pipeline-cost">Monthly Cost: ${pipeline.cost}</div>
+                </div>
+                <div class="pipeline-status">
+                    <span class="status-badge ${statusClass}">${pipeline.status}</span>
+                    <div class="action-btns">
+                        <button class="btn btn-outline btn-sm view-logs-btn" data-id="${pipeline.id}">
+                            <span class="btn-icon">📋</span> Logs
+                        </button>
+                        <button class="btn btn-success btn-sm">
+                            <span class="btn-icon">▶️</span> Run
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return li;
+        }
+        
+        // Populate build history
+        function populateBuildHistory() {
+            const historyContainer = document.getElementById('buildHistory');
+            historyContainer.innerHTML = '';
+            
+            buildHistory.forEach(build => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                let statusClass = '';
+                switch (build.status) {
+                    case 'success': statusClass = 'status-success'; break;
+                    case 'running': statusClass = 'status-running'; break;
+                    case 'failed': statusClass = 'status-failed'; break;
+                    case 'pending': statusClass = 'status-pending'; break;
+                }
+                
+                historyItem.innerHTML = `
+                    <div class="history-details">
+                        <div class="build-number">${build.number} - ${build.pipeline}</div>
+                        <div class="build-info">
+                            <span>Branch: ${build.branch}</span>
+                            <span>Commit: ${build.commit}</span>
+                            <span>By: ${build.author}</span>
+                            <span>${build.timestamp}</span>
+                        </div>
+                    </div>
+                    <div class="pipeline-status">
+                        <span class="status-badge ${statusClass}">${build.status}</span>
+                        <span class="build-duration">${build.duration}</span>
+                        <button class="btn btn-outline btn-sm view-logs-btn" data-id="${build.id}">
+                            <span class="btn-icon">📋</span> Logs
+                        </button>
+                    </div>
+                `;
+                
+                historyContainer.appendChild(historyItem);
+            });
+            
+            // Add event listeners to buttons
+            document.querySelectorAll('.view-logs-btn').forEach(btn => {
+                btn.addEventListener('click', () => showBuildLogs());
+            });
+        }
+        
+        // Show build logs
+        function showBuildLogs() {
+            const logsContainer = document.getElementById('buildLogs');
+            logsContainer.innerHTML = '';
+            
+            buildLogs.forEach(log => {
+                const logLine = document.createElement('div');
+                logLine.className = 'log-line';
+                
+                let logClass = '';
+                switch (log.type) {
+                    case 'info': logClass = 'log-info'; break;
+                    case 'success': logClass = 'log-success'; break;
+                    case 'warning': logClass = 'log-warning'; break;
+                    case 'error': logClass = 'log-error'; break;
+                }
+                
+                logLine.innerHTML = `
+                    <span class="log-time">[${log.time}]</span>
+                    <span class="${logClass}">${log.message}</span>
+                `;
+                
+                logsContainer.appendChild(logLine);
+            });
+            
+            document.getElementById('buildLogsModal').style.display = 'flex';
+        }
+        
+        // Initialize cost chart
+        function initCostChart() {
+            const costChart = document.getElementById('costChart');
+            costChart.innerHTML = '';
+            
+            // Sample data for the last 12 days
+            const costData = [32, 28, 45, 38, 42, 56, 48, 52, 39, 45, 62, 58];
+            
+            // Calculate max value for scaling
+            const maxValue = Math.max(...costData);
+            
+            // Create bars
+            costData.forEach((value, index) => {
+                const barHeight = (value / maxValue) * 100;
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = `${barHeight}%`;
+                bar.style.left = `${index * 8.33}%`;
+                costChart.appendChild(bar);
+            });
+        }
+        
+        // Tab switching
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    const tabId = tab.getAttribute('data-tab');
+                    document.querySelectorAll('.pipeline-container').forEach(container => {
+                        container.classList.add('hidden');
+                    });
+                    document.getElementById(`${tabId}Pipelines`).classList.remove('hidden');
+                });
+            });
+        }
+        
+        // Pipeline size slider
+        function setupPipelineSizeSlider() {
+            const slider = document.getElementById('pipelineSizeSlider');
+            const costEstimate = document.getElementById('costEstimate');
+            const costAlert = document.getElementById('costAlert');
+            
+            slider.addEventListener('input', () => {
+                const value = slider.value;
+                let cost;
+                
+                if (value <= 3) {
+                    cost = (value * 0.04).toFixed(2);
+                    costAlert.style.display = 'none';
+                } else if (value <= 7) {
+                    cost = (value * 0.08).toFixed(2);
+                    costAlert.style.display = 'none';
+                } else {
+                    cost = (value * 0.12).toFixed(2);
+                    costAlert.style.display = 'block';
+                }
+                
+                costEstimate.textContent = `Estimated Cost: $${cost} per run`;
+            });
+        }
+        
+        // Modal handling
+        function setupModals() {
+            const newPipelineBtn = document.getElementById('newPipelineBtn');
+            const closeNewPipelineModal = document.getElementById('closeNewPipelineModal');
+            const cancelNewPipeline = document.getElementById('cancelNewPipeline');
+            const newPipelineModal = document.getElementById('newPipelineModal');
+            
+            const closeBuildLogsModal = document.getElementById('closeBuildLogsModal');
+            const closeLogs = document.getElementById('closeLogs');
+            const buildLogsModal = document.getElementById('buildLogsModal');
+            
+            newPipelineBtn.addEventListener('click', () => {
+                newPipelineModal.style.display = 'flex';
+            });
+            
+            closeNewPipelineModal.addEventListener('click', () => {
+                newPipelineModal.style.display = 'none';
+            });
+            
+            cancelNewPipeline.addEventListener('click', () => {
+                newPipelineModal.style.display = 'none';
+            });
+            
+            closeBuildLogsModal.addEventListener('click', () => {
+                buildLogsModal.style.display = 'none';
+            });
+            
+            closeLogs.addEventListener('click', () => {
+                buildLogsModal.style.display = 'none';
+            });
+            
+            // Close modals when clicking outside
+            window.addEventListener('click', (event) => {
+                if (event.target === newPipelineModal) {
+                    newPipelineModal.style.display = 'none';
+                }
+                if (event.target === buildLogsModal) {
+                    buildLogsModal.style.display = 'none';
+                }
+            });
+        }
+        
+        // Simulating cost updates
+        function simulateCostUpdates() {
+            setInterval(() => {
+                // Generate random fluctuations
+                const computingCost = (321.45 + (Math.random() * 5 - 2.5)).toFixed(2);
+                const storageCost = (98.20 + (Math.random() * 2 - 1)).toFixed(2);
+                const networkCost = (127.63 + (Math.random() * 3 - 1.5)).toFixed(2);
+                const totalCost = (parseFloat(computingCost) + parseFloat(storageCost) + parseFloat(networkCost)).toFixed(2);
+                
+                // Update values in sidebar
+                document.getElementById('computingCost').textContent = `$${computingCost}`;
+                document.getElementById('storageCost').textContent = `$${storageCost}`;
+                document.getElementById('networkCost').textContent = `$${networkCost}`;
+                document.getElementById('sidebarTotalCost').textContent = `$${totalCost}`;
+                
+                // Update values in donut chart
+                document.getElementById('computingCostLegend').textContent = `$${computingCost}`;
+                document.getElementById('storageCostLegend').textContent = `$${storageCost}`;
+                document.getElementById('networkCostLegend').textContent = `$${networkCost}`;
+                document.getElementById('totalCostText').textContent = `$${totalCost}`;
+                document.getElementById('monthlyCost').textContent = `$${totalCost}`;
+                document.getElementById('totalCostBreakdown').textContent = `$${totalCost}`;
+                
+                // Update pipeline runtime cost
+                const pipelineRuntimeCost = (parseFloat(computingCost) - 32.13).toFixed(2);
+                document.getElementById('pipelineRuntimeCost').textContent = `$${pipelineRuntimeCost}`;
+                document.getElementById('storageCostBreakdown').textContent = `$${storageCost}`;
+                document.getElementById('dataTransferCost').textContent = `$${networkCost}`;
+                
+                // Update forecast
+                const forecastValue = (parseFloat(totalCost) * 1.33).toFixed(2);
+                const forecastDifference = (parseFloat(forecastValue) - parseFloat(totalCost)).toFixed(2);
+                document.getElementById('forecastValue').textContent = `$${forecastValue}`;
+                document.getElementById('forecastDifference').textContent = `+$${forecastDifference}`;
+                
+                // Simulate occasional stats updating
+                if (Math.random() > 0.7) {
+                    const successRate = Math.floor(85 + Math.random() * 5);
+                    document.getElementById('successRate').textContent = `${successRate}%`;
+                    
+                    const deployments = Math.floor(7 + Math.random() * 3);
+                    document.getElementById('deploymentsToday').textContent = deployments;
+                    document.getElementById('deploymentsTrend').textContent = `+${deployments - 6} vs yesterday`;
+                }
+            }, 5000);
+        }
+        
+        // Refresh buttons
+        function setupRefreshButtons() {
+            document.getElementById('refreshBtn').addEventListener('click', () => {
+                populatePipelines();
+            });
+            
+            document.getElementById('refreshCostBtn').addEventListener('click', () => {
+                initCostChart();
+            });
+        }
+        
+        // Create New Pipeline functionality
+        function setupCreatePipelineButton() {
+            const createNewPipelineBtn = document.getElementById('createNewPipeline');
+            const newPipelineModal = document.getElementById('newPipelineModal');
+            
+            createNewPipelineBtn.addEventListener('click', () => {
+                // Get form values
+                const pipelineName = document.getElementById('pipelineName').value;
+                const repositoryUrl = document.getElementById('repositoryUrl').value;
+                const branchName = document.getElementById('branchName').value || 'main';
+                const environment = document.getElementById('environment').value;
+                const pipelineSize = document.getElementById('pipelineSizeSlider').value;
+                
+                // Validate form
+                if (!pipelineName || !repositoryUrl) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+                
+                // Create a new pipeline object
+                const repoShortName = repositoryUrl.split('/').slice(-2).join('/');
+                const newPipeline = {
+                    id: pipelines.length + 1,
+                    name: pipelineName,
+                    repo: repoShortName,
+                    status: 'pending',
+                    cost: '$0.00',
+                    environment: environment
+                };
+                
+                // Add to pipelines array
+                pipelines.push(newPipeline);
+                
+                // Update the UI
+                populatePipelines();
+                
+                // Update stats
+                const activePipelinesElement = document.getElementById('activePipelines');
+                const currentActivePipelines = parseInt(activePipelinesElement.textContent);
+                activePipelinesElement.textContent = (currentActivePipelines + 1).toString();
+                
+                // Briefly highlight the stat card
+                const statCard = activePipelinesElement.closest('.stat-card');
+                statCard.classList.add('updating');
+                setTimeout(() => {
+                    statCard.classList.remove('updating');
+                }, 1000);
+                
+                // Reset form and close modal
+                document.getElementById('pipelineName').value = '';
+                document.getElementById('repositoryUrl').value = '';
+                document.getElementById('branchName').value = '';
+                document.getElementById('environment').value = 'production';
+                document.getElementById('pipelineSizeSlider').value = 5;
+                
+                newPipelineModal.style.display = 'none';
+                
+                // Show a notification (could be enhanced with a proper notification system)
+                alert('Pipeline created successfully!');
+            });
+        }
+        
+        // Initialize everything
+        populatePipelines();
+        populateBuildHistory();
+        initCostChart();
+        setupTabs();
+        setupPipelineSizeSlider();
+        setupModals();
+        simulateCostUpdates();
+        setupRefreshButtons();
+        setupCreatePipelineButton();
+    });
+</script>
+</body>
+</html>

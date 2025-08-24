@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS API Gateway Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #232f3e;
+            border-bottom: 2px solid #ff9900;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea, select, input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+        button {
+            background-color: #ff9900;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #e88b00;
+        }
+        .code-preview {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .api-details {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f0f8ff;
+        }
+        .method-selector {
+            display: flex;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        .method-btn {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            background-color: #eaeaea;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .method-btn.active {
+            background-color: #232f3e;
+            color: white;
+            border-color: #232f3e;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 0;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff9900;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .copy-btn {
+            background-color: #eaeaea;
+            color: #333;
+            font-size: 12px;
+            padding: 5px 10px;
+            float: right;
+            margin-bottom: 5px;
+        }
+        .success-message {
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 15px;
+            display: none;
+        }
+        .field-group {
+            margin-bottom: 10px;
+        }
+        .aws-resources {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff8e1;
+            border-radius: 4px;
+            border: 1px solid #ffe57f;
+        }
+        .generated-url {
+            font-weight: bold;
+            color: #0066cc;
+            word-break: break-all;
+        }
+        .steps {
+            margin-top: 15px;
+            padding-left: 20px;
+        }
+        .steps li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>API Gateway </h1>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="code-upload">Upload Code</div>
+            <div class="tab" data-tab="code-editor">Code Editor</div>
+            <div class="tab" data-tab="test-api">Test API</div>
+        </div>
+        
+        <div class="tab-content active" id="code-upload">
+            <div class="form-group">
+                <label for="upload-file">Upload Lambda Function Code:</label>
+                <input type="file" id="upload-file" accept=".js,.py,.java,.go">
+                <small>Supported formats: .js (Node.js), .py (Python), .java (Java), .go (Go)</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Runtime:</label>
+                <select id="runtime">
+                    <option value="nodejs16.x">Node.js 16.x</option>
+                    <option value="python3.9">Python 3.9</option>
+                    <option value="java11">Java 11</option>
+                    <option value="go1.x">Go 1.x</option>
+                </select>
+            </div>
+            
+            <div class="code-preview">
+                <button class="copy-btn" id="copy-code-btn">Copy</button>
+                <pre id="code-preview">Code preview will appear here</pre>
+            </div>
+            
+            <button id="generate-from-upload">Generate API Gateway URL</button>
+        </div>
+        
+        <div class="tab-content" id="code-editor">
+            <div class="form-group">
+                <label>Runtime:</label>
+                <select id="editor-runtime">
+                    <option value="nodejs16.x">Node.js 16.x</option>
+                    <option value="python3.9">Python 3.9</option>
+                    <option value="java11">Java 11</option>
+                    <option value="go1.x">Go 1.x</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="code-editor-text">Function Code:</label>
+                <textarea id="code-editor-text" placeholder="// Write your Lambda function code here"></textarea>
+            </div>
+            
+            <button id="generate-from-editor">Generate API Gateway URL</button>
+        </div>
+        
+        <div class="tab-content" id="test-api">
+            <div class="form-group">
+                <label for="api-url">API Gateway URL:</label>
+                <input type="text" id="api-url" placeholder="https://xyz123.execute-api.region.amazonaws.com/stage/resource">
+            </div>
+            
+            <div class="method-selector">
+                <div class="method-btn active" data-method="GET">GET</div>
+                <div class="method-btn" data-method="POST">POST</div>
+                <div class="method-btn" data-method="PUT">PUT</div>
+                <div class="method-btn" data-method="DELETE">DELETE</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="request-headers">Headers (JSON format):</label>
+                <textarea id="request-headers" placeholder='{"Content-Type": "application/json", "x-api-key": "your-api-key-here"}'></textarea>
+            </div>
+            
+            <div id="body-container" class="form-group">
+                <label for="request-body">Request Body (JSON):</label>
+                <textarea id="request-body" placeholder='{"key": "value"}'></textarea>
+            </div>
+            
+            <button id="send-request">Send Request</button>
+            
+            <div class="response-container">
+                <h3>Response</h3>
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Processing request...</p>
+                </div>
+                <div class="response-area">
+                    <pre id="response-data">Response will appear here</pre>
+                </div>
+            </div>
+        </div>
+        
+        <div id="api-gateway-result" class="api-details" style="display: none;">
+            <h2>Generated API Gateway</h2>
+            <div class="field-group">
+                <strong>API Gateway URL:</strong>
+                <div class="generated-url" id="generated-url"></div>
+                <button class="copy-btn" id="copy-url-btn">Copy URL</button>
+            </div>
+            
+            <div class="aws-resources">
+                <h3>AWS Resources Created:</h3>
+                <ul>
+                    <li><strong>Lambda Function:</strong> <span id="lambda-name"></span></li>
+                    <li><strong>API Gateway:</strong> <span id="api-gateway-name"></span></li>
+                    <li><strong>API Key:</strong> <span id="api-key"></span></li>
+                </ul>
+                
+                <div class="steps">
+                    <h4>Next Steps:</h4>
+                    <ol>
+                        <li>This URL is ready to use for API requests</li>
+                        <li>Test your API in the "Test API" tab</li>
+                        <li>Use this URL in your application</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <div class="success-message" id="success-message"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching functionality
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    document.getElementById(targetTab).classList.add('active');
+                });
+            });
+            
+            // Method selection for testing API
+            const methodBtns = document.querySelectorAll('.method-btn');
+            let currentMethod = 'GET';
+            const bodyContainer = document.getElementById('body-container');
+            
+            // Initially hide body for GET requests
+            if (currentMethod === 'GET') {
+                bodyContainer.style.display = 'none';
+            }
+            
+            methodBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    methodBtns.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    // Update current method
+                    currentMethod = this.getAttribute('data-method');
+                    
+                    // Show/hide body input based on method
+                    if (currentMethod === 'GET' || currentMethod === 'DELETE') {
+                        bodyContainer.style.display = 'none';
+                    } else {
+                        bodyContainer.style.display = 'block';
+                    }
+                });
+            });
+            
+            // File upload handler
+            document.getElementById('upload-file').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                // Set runtime based on file extension
+                const fileExt = file.name.split('.').pop().toLowerCase();
+                let runtime = '';
+                
+                switch(fileExt) {
+                    case 'js':
+                        runtime = 'nodejs16.x';
+                        break;
+                    case 'py':
+                        runtime = 'python3.9';
+                        break;
+                    case 'java':
+                        runtime = 'java11';
+                        break;
+                    case 'go':
+                        runtime = 'go1.x';
+                        break;
+                    default:
+                        runtime = 'nodejs16.x';
+                }
+                
+                document.getElementById('runtime').value = runtime;
+                
+                // Read and display file content
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('code-preview').textContent = e.target.result;
+                };
+                reader.readAsText(file);
+            });
+            
+            // Copy code button
+            document.getElementById('copy-code-btn').addEventListener('click', function() {
+                const codeText = document.getElementById('code-preview').textContent;
+                navigator.clipboard.writeText(codeText).then(() => {
+                    showSuccessMessage('Code copied to clipboard!');
+                });
+            });
+            
+            // Copy URL button
+            document.getElementById('copy-url-btn').addEventListener('click', function() {
+                const urlText = document.getElementById('generated-url').textContent;
+                navigator.clipboard.writeText(urlText).then(() => {
+                    showSuccessMessage('URL copied to clipboard!');
+                });
+            });
+            
+            // Generate API Gateway from uploaded code
+            document.getElementById('generate-from-upload').addEventListener('click', function() {
+                const codeContent = document.getElementById('code-preview').textContent;
+                const runtime = document.getElementById('runtime').value;
+                
+                if (codeContent === 'Code preview will appear here') {
+                    alert('Please upload a code file first');
+                    return;
+                }
+                
+                generateApiGateway(codeContent, runtime);
+            });
+            
+            // Generate API Gateway from editor code
+            document.getElementById('generate-from-editor').addEventListener('click', function() {
+                const codeContent = document.getElementById('code-editor-text').value;
+                const runtime = document.getElementById('editor-runtime').value;
+                
+                if (!codeContent.trim()) {
+                    alert('Please enter some code first');
+                    return;
+                }
+                
+                generateApiGateway(codeContent, runtime);
+            });
+            
+            // Send request to API Gateway
+            document.getElementById('send-request').addEventListener('click', async function() {
+                const apiUrl = document.getElementById('api-url').value.trim();
+                if (!apiUrl) {
+                    alert('Please enter an API Gateway URL');
+                    return;
+                }
+                
+                // Get headers
+                let headers = {};
+                try {
+                    const headersText = document.getElementById('request-headers').value.trim();
+                    if (headersText) {
+                        headers = JSON.parse(headersText);
+                    }
+                } catch (e) {
+                    alert('Invalid JSON in headers field');
+                    return;
+                }
+                
+                // Get body for POST/PUT requests
+                let body = null;
+                if (currentMethod !== 'GET' && currentMethod !== 'DELETE') {
+                    try {
+                        const bodyText = document.getElementById('request-body').value.trim();
+                        if (bodyText) {
+                            body = bodyText;
+                        }
+                    } catch (e) {
+                        alert('Invalid JSON in request body');
+                        return;
+                    }
+                }
+                
+                // Show loading
+                document.querySelector('.loading').style.display = 'block';
+                document.getElementById('response-data').textContent = 'Fetching...';
+                
+                try {
+                    const options = {
+                        method: currentMethod,
+                        headers: headers
+                    };
+                    
+                    if (body && (currentMethod === 'POST' || currentMethod === 'PUT')) {
+                        options.body = body;
+                    }
+                    
+                    // For the mock demo, we'll simulate a response
+                    setTimeout(() => {
+                        let responseObj = {
+                            success: true,
+                            message: `Successfully processed ${currentMethod} request`,
+                            timestamp: new Date().toISOString(),
+                            requestData: body ? JSON.parse(body) : null
+                        };
+                        
+                        document.getElementById('response-data').textContent = JSON.stringify(responseObj, null, 2);
+                        document.querySelector('.loading').style.display = 'none';
+                    }, 1000);
+                    
+                    /* In a real application, you would use fetch:
+                    const response = await fetch(apiUrl, options);
+                    const data = await response.json();
+                    document.getElementById('response-data').textContent = JSON.stringify(data, null, 2);
+                    document.querySelector('.loading').style.display = 'none';
+                    */
+                } catch (error) {
+                    document.getElementById('response-data').textContent = `Error: ${error.message}`;
+                    document.querySelector('.loading').style.display = 'none';
+                }
+            });
+            
+            // Function to generate API Gateway URL
+            function generateApiGateway(code, runtime) {
+                document.querySelector('.loading').style.display = 'block';
+                
+                // Generate a random ID for resources
+                const resourceId = Math.random().toString(36).substring(2, 10);
+                
+                // For the demo, we'll create mock values
+                setTimeout(() => {
+                    // Create API Gateway URL based on code analysis
+                    const region = ['us-east-1', 'us-west-2', 'eu-west-1'][Math.floor(Math.random() * 3)];
+                    const apiId = `${resourceId}api`;
+                    const stage = 'prod';
+                    const resource = detectResourceFromCode(code);
+                    
+                    // Create the URL
+                    const apiUrl = `https://${apiId}.execute-api.${region}.amazonaws.com/${stage}/${resource}`;
+                    
+                    // Set resource names
+                    document.getElementById('lambda-name').textContent = `lambda-${resourceId}`;
+                    document.getElementById('api-gateway-name').textContent = `api-gateway-${resourceId}`;
+                    document.getElementById('api-key').textContent = `apikey-${resourceId.toUpperCase()}`;
+                    
+                    // Set the generated URL
+                    document.getElementById('generated-url').textContent = apiUrl;
+                    document.getElementById('api-url').value = apiUrl;
+                    
+                    // Show the result section
+                    document.getElementById('api-gateway-result').style.display = 'block';
+                    
+                    // Switch to the test tab
+                    document.querySelector('[data-tab="test-api"]').click();
+                    
+                    // Hide loading
+                    document.querySelector('.loading').style.display = 'none';
+                    
+                    showSuccessMessage('API Gateway URL successfully generated!');
+                }, 1500);
+            }
+            
+            // Function to detect resource from code
+            function detectResourceFromCode(code) {
+                // This would ideally parse the code to find API routes
+                // For demo purposes, we'll just extract some basic patterns or use defaults
+                
+                const resources = ['users', 'products', 'orders', 'data', 'items', 'api'];
+                
+                // Look for route patterns in the code
+                if (code.includes('/users') || code.includes('user')) return 'users';
+                if (code.includes('/products') || code.includes('product')) return 'products';
+                if (code.includes('/orders') || code.includes('order')) return 'orders';
+                if (code.includes('/data') || code.includes('data')) return 'data';
+                
+                // Return a random resource if none detected
+                return resources[Math.floor(Math.random() * resources.length)];
+            }
+            
+            // Function to show success message
+            function showSuccessMessage(message) {
+                const successElement = document.getElementById('success-message');
+                successElement.textContent = message;
+                successElement.style.display = 'block';
+                
+                setTimeout(() => {
+                    successElement.style.display = 'none';
+                }, 3000);
+            }
+            
+            // Provide example code when selecting runtime in editor
+            document.getElementById('editor-runtime').addEventListener('change', function() {
+                const runtime = this.value;
+                const editorElement = document.getElementById('code-editor-text');
+                let exampleCode = '';
+                
+                switch(runtime) {
+                    case 'nodejs16.x':
+                        exampleCode = `exports.handler = async (event) => {
+    const response = {
+        statusCode: 200,
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            message: "Hello from Lambda!",
+            event: event
+        })
+    };
+    return response;
+};`;
+                        break;
+                    case 'python3.9':
+                        exampleCode = `import json
+
+def lambda_handler(event, context):
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Content-Type': 'application/json'
+        },
+        'body': json.dumps({
+            'message': 'Hello from Lambda!',
+            'event': event
+        })
+    }`;
+                        break;
+                    case 'java11':
+                        exampleCode = `package example;
+
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+
+public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+    @Override
+    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
+        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+        response.setStatusCode(200);
+        response.setBody("{\\"message\\":\\"Hello from Lambda!\\"}");
+        return response;
+    }
+}`;
+                        break;
+                    case 'go1.x':
+                        exampleCode = `package main
+
+import (
+    "context"
+    "encoding/json"
+    
+    "github.com/aws/aws-lambda-go/events"
+    "github.com/aws/aws-lambda-go/lambda"
+)
+
+func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+    response := map[string]string{
+        "message": "Hello from Lambda!",
+    }
+    
+    responseBody, _ := json.Marshal(response)
+    
+    return events.APIGatewayProxyResponse{
+        Body:       string(responseBody),
+        StatusCode: 200,
+    }, nil
+}
+
+func main() {
+    lambda.Start(handler)
+}`;
+                        break;
+                }
+                
+                editorElement.value = exampleCode;
+            });
+            
+            // Initialize with Node.js example
+            document.getElementById('editor-runtime').dispatchEvent(new Event('change'));
+        });
+    </script>
+</body>
+</html>

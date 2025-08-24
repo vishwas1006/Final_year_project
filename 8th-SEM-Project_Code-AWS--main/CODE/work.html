@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Services Workspace</title>
+  <style>
+    :root {
+      --primary: #4a6bdf;
+      --secondary: #2d3748;
+      --success: #38b2ac;
+      --warning: #ed8936;
+      --danger: #e53e3e;
+      --light: #f7fafc;
+      --dark: #1a202c;
+      --border: #e2e8f0;
+      --text: #4a5568;
+      --text-light: #718096;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    body {
+      font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f7fafc;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background-color: var(--secondary);
+      color: white;
+      padding: 1.5rem 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      transition: all 0.3s;
+      z-index: 10;
+    }
+    
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 1rem;
+    }
+    
+    .sidebar-logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: white;
+      display: flex;
+      align-items: center;
+    }
+    
+    .sidebar-logo span {
+      margin-left: 0.5rem;
+    }
+    
+    .sidebar-menu {
+      padding: 0 1rem;
+    }
+    
+    .menu-category {
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin: 1.5rem 0 0.5rem 0.5rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      border-radius: 0.375rem;
+      margin-bottom: 0.25rem;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .menu-item i {
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
+    }
+    
+    .menu-item.active {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .menu-item:hover:not(.active) {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    
+    .header-title h1 {
+      margin: 0;
+      font-size: 1.75rem;
+      color: var(--dark);
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+    }
+    
+    .search-box {
+      position: relative;
+      margin-right: 1rem;
+    }
+    
+    .search-box input {
+      padding: 0.5rem 1rem 0.5rem 2.5rem;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: white;
+      font-size: 0.875rem;
+      width: 220px;
+      transition: all 0.3s;
+    }
+    
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(74, 107, 223, 0.2);
+    }
+    
+    .search-box i {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+    }
+    
+    .user-menu {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+    
+    .user-info {
+      margin-left: 0.75rem;
+    }
+    
+    .user-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--dark);
+    }
+    
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+    
+    /* Cards and Dashboard */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-gap: 1.5rem;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: var(--shadow);
+      transition: all 0.3s;
+      overflow: hidden;
+    }
+    
+    .card:hover {
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+      transform: translateY(-5px);
+    }
+    
+    .card-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .card-title {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    .card-action {
+      color: var(--primary);
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    
+    .card-body {
+      padding: 1.25rem;
+    }
+    
+    .card-footer {
+      padding: 1rem 1.25rem;
+      background-color: var(--light);
+      border-top: 1px solid var(--border);
+    }
+    
+    .small-card {
+      grid-column: span 3;
+    }
+    
+    .medium-card {
+      grid-column: span 6;
+    }
+    
+    .large-card {
+      grid-column: span 9;
+    }
+    
+    .full-card {
+      grid-column: span 12;
+    }
+    
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: var(--shadow);
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      margin-right: 1rem;
+    }
+    
+    .stat-icon.aws {
+      background-color: #FF9900;
+    }
+    
+    .stat-icon.gcp {
+      background-color: #4285F4;
+    }
+    
+    .stat-icon.azure {
+      background-color: #0089D6;
+    }
+    
+    .stat-icon.cost {
+      background-color: var(--success);
+    }
+    
+    .stat-content {
+      flex: 1;
+    }
+    
+    .stat-title {
+      font-size: 0.875rem;
+      color: var(--text-light);
+      margin-bottom: 0.25rem;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+    
+    .stat-change {
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+    }
+    
+    .change-up {
+      color: var(--success);
+    }
+    
+    .change-down {
+      color: var(--danger);
+    }
+    
+    /* Workspace Cards */
+    .workspace-card {
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .workspace-card:last-child {
+      border-bottom: none;
+    }
+    
+    .workspace-card:hover {
+      background-color: rgba(0, 0, 0, 0.01);
+    }
+    
+    .workspace-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: white;
+      margin-right: 1rem;
+    }
+    
+    .workspace-icon.aws {
+      background-color: #FF9900;
+    }
+    
+    .workspace-icon.gcp {
+      background-color: #4285F4;
+    }
+    
+    .workspace-icon.azure {
+      background-color: #0089D6;
+    }
+    
+    .workspace-content {
+      flex: 1;
+    }
+    
+    .workspace-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: var(--dark);
+    }
+    
+    .workspace-info {
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+    
+    .workspace-users {
+      display: flex;
+      align-items: center;
+    }
+    
+    .user-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: -8px;
+      border: 2px solid white;
+    }
+    
+    .user-circle:first-child {
+      margin-left: 0;
+    }
+    
+    .workspace-status {
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .status-active {
+      background-color: rgba(56, 178, 172, 0.1);
+      color: var(--success);
+    }
+    
+    .status-maintenance {
+      background-color: rgba(237, 137, 54, 0.1);
+      color: var(--warning);
+    }
+    
+    /* Activity & Timeline */
+    .activity-timeline {
+      position: relative;
+      padding-left: 1.5rem;
+    }
+    
+    .activity-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 8px;
+      width: 2px;
+      background-color: var(--border);
+      z-index: 1;
+    }
+    
+    .activity-item {
+      position: relative;
+      padding-bottom: 1.5rem;
+      z-index: 2;
+    }
+    
+    .activity-item:last-child {
+      padding-bottom: 0;
+    }
+    
+    .activity-dot {
+      position: absolute;
+      left: -1.25rem;
+      top: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: white;
+      border: 2px solid var(--primary);
+    }
+    
+    .activity-dot.aws {
+      border-color: #FF9900;
+    }
+    
+    .activity-dot.gcp {
+      border-color: #4285F4;
+    }
+    
+    .activity-dot.azure {
+      border-color: #0089D6;
+    }
+    
+    .activity-content {
+      background-color: var(--light);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .activity-time {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-top: 0.5rem;
+    }
+    
+    /* Resource List */
+    .resource-list {
+      margin-top: 0.5rem;
+    }
+    
+    .resource-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem;
+      border-radius: 0.375rem;
+      margin-bottom: 0.5rem;
+      background-color: var(--light);
+      transition: all 0.3s;
+    }
+    
+    .resource-item:hover {
+      background-color: #e6eaff;
+    }
+    
+    .resource-info {
+      display: flex;
+      align-items: center;
+    }
+    
+    .resource-type {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      margin-right: 0.75rem;
+      font-size: 0.875rem;
+    }
+    
+    .resource-type.aws {
+      background-color: #FF9900;
+    }
+    
+    .resource-type.gcp {
+      background-color: #4285F4;
+    }
+    
+    .resource-type.azure {
+      background-color: #0089D6;
+    }
+    
+    .resource-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 0.125rem;
+    }
+    
+    .resource-details {
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+
+    .resource-status {
+      display: flex;
+      align-items: center;
+    }
+    
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #3a57c2;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--border);
+    }
+    
+    .btn-outline:hover {
+      background-color: var(--light);
+    }
+
+    .btn i {
+      margin-right: 0.375rem;
+    }
+    
+    .btn-sm {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+    }
+    
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    th {
+      font-weight: 600;
+      color: var(--text-light);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    tr:hover {
+      background-color: rgba(0, 0, 0, 0.01);
+    }
+    
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--secondary);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      z-index: 1000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .toast-success {
+      background-color: var(--success);
+    }
+    
+    .toast-warning {
+      background-color: var(--warning);
+    }
+    
+    .toast-error {
+      background-color: var(--danger);
+    }
+    
+    .toast-icon {
+      margin-right: 12px;
+      font-size: 18px;
+    }
+    
+    .toast-content {
+      flex: 1;
+    }
+    
+    .toast-close {
+      margin-left: 12px;
+      cursor: pointer;
+      opacity: 0.7;
+    }
+    
+    .toast-close:hover {
+      opacity: 1;
+    }
+    
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal {
+      background-color: white;
+      border-radius: 8px;
+      width: 500px;
+      max-width: 90%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+    }
+    
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+    
+    .modal-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .modal-title {
+      font-weight: 600;
+      font-size: 18px;
+      color: var(--dark);
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-light);
+    }
+    
+    .modal-body {
+      padding: 24px;
+    }
+    
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(74, 107, 223, 0.2);
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 14px;
+      background-color: white;
+      cursor: pointer;
+    }
+    
+    /* For mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 80px;
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+        width: 260px;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .small-card,
+      .medium-card,
+      .large-card,
+      .full-card {
+        grid-column: span 12;
+      }
+    }
+    
+    /* Progress bars */
+    .progress-container {
+      margin-top: 0.5rem;
+    }
+    
+    .progress-item {
+      margin-bottom: 1rem;
+    }
+    
+    .progress-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+      font-size: 0.875rem;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background-color: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <span>CloudWorkspace</span>
+        </div>
+      </div>
+      
+      <div class="sidebar-menu">
+        <div class="menu-category">Main</div>
+        <div class="menu-item active" data-page="dashboard">
+          <i>📊</i>
+          <span>Dashboard</span>
+        </div>
+        <div class="menu-item" data-page="workspaces">
+          <i>💼</i>
+          <span>Workspaces</span>
+        </div>
+        <div class="menu-item" data-page="resources">
+          <i>🖥️</i>
+          <span>Resources</span>
+        </div>
+        <div class="menu-item" data-page="monitoring">
+          <i>📈</i>
+          <span>Monitoring</span>
+        </div>
+        
+        <div class="menu-category">Cloud Services</div>
+        <div class="menu-item" data-page="aws">
+          <i>☁️</i>
+          <span>AWS</span>
+        </div>
+        <div class="menu-item" data-page="gcp">
+          <i>☁️</i>
+          <span>Google Cloud</span>
+        </div>
+        <div class="menu-item" data-page="azure">
+          <i>☁️</i>
+          <span>Azure</span>
+        </div>
+        
+        <div class="menu-category">Management</div>
+        <div class="menu-item" data-page="team">
+          <i>👥</i>
+          <span>Team</span>
+        </div>
+        <div class="menu-item" data-page="settings">
+          <i>⚙️</i>
+          <span>Settings</span>
+        </div>
+        <div class="menu-item" data-page="logs">
+          <i>📝</i>
+          <span>Logs</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="header">
+        <div class="header-title">
+          <h1>Cloud Workspace Dashboard</h1>
+        </div>
+        <div class="header-actions">
+          <div class="search-box">
+            <i>🔍</i>
+            <input type="text" placeholder="Search resources..." id="searchInput">
+          </div>
+          <div class="user-menu" id="userMenu">
+            <div class="user-avatar">User</div>
+            <div class="user-info">
+              <div class="user-name">John Doe</div>
+              <div class="user-role">Administrator</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon aws">AWS</div>
+          <div class="stat-content">
+            <div class="stat-title">AWS Resources</div>
+            <div class="stat-value">24</div>
+            <div class="stat-change change-up">+3 this week</div>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon gcp">GCP</div>
+          <div class="stat-content">
+            <div class="stat-title">GCP Resources</div>
+            <div class="stat-value">16</div>
+            <div class="stat-change change-up">+2 this week</div>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon azure">AZR</div>
+          <div class="stat-content">
+            <div class="stat-title">Azure Resources</div>
+            <div class="stat-value">18</div>
+            <div class="stat-change">No change</div>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon cost">$</div>
+          <div class="stat-content">
+            <div class="stat-title">Monthly Cost</div>
+            <div class="stat-value">$5,240</div>
+            <div class="stat-change change-down">-8% from last month</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Dashboard Cards -->
+      <div class="dashboard">
+        <!-- Active Workspaces -->
+        <div class="card medium-card">
+          <div class="card-header">
+            <h3 class="card-title">Active Workspaces</h3>
+            <div class="card-action" id="viewAllWorkspaces">View All</div>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <div class="workspace-card" data-workspace="production">
+              <div class="workspace-icon aws">AWS</div>
+              <div class="workspace-content">
+                <div class="workspace-title">Production Environment</div>
+                <div class="workspace-info">12 Resources • Last updated 2h ago</div>
+              </div>
+              <div class="workspace-users">
+                <div class="user-circle">User</div>
+                <div class="user-circle">AK</div>
+                <div class="user-circle">MR</div>
+              </div>
+              <div class="workspace-status status-active">Active</div>
+            </div>
+            
+            <div class="workspace-card" data-workspace="data-pipeline">
+              <div class="workspace-icon gcp">GCP</div>
+              <div class="workspace-content">
+                <div class="workspace-title">Data Processing Pipeline</div>
+                <div class="workspace-info">8 Resources • Last updated 5h ago</div>
+              </div>
+              <div class="workspace-users">
+                <div class="user-circle">User</div>
+                <div class="user-circle">TS</div>
+              </div>
+              <div class="workspace-status status-active">Active</div>
+            </div>
+            
+            <div class="workspace-card" data-workspace="auth">
+              <div class="workspace-icon azure">AZR</div>
+              <div class="workspace-content">
+                <div class="workspace-title">Authentication Services</div>
+                <div class="workspace-info">6 Resources • Last updated 1d ago</div>
+              </div>
+              <div class="workspace-users">
+                <div class="user-circle">MR</div>
+                <div class="user-circle">AK</div>
+              </div>
+              <div class="workspace-status status-maintenance">Maintenance</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-primary" id="createWorkspace">
+              <i>➕</i> Create Workspace
+            </button>
+          </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="card medium-card">
+          <div class="card-header">
+            <h3 class="card-title">Recent Activity</h3>
+            <div class="card-action" id="viewAllActivity">View All</div>
+          </div>
+          <div class="card-body">
+            <div class="activity-timeline">
+              <div class="activity-line"></div>
+              
+              <div class="activity-item">
+                <div class="activity-dot aws"></div>
+                <div class="activity-content">
+                  <strong>EC2 Instance</strong> was started in <strong>Production Environment</strong>
+                  <div class="activity-time">Today, 10:45 AM by John Doe</div>
+                </div>
+              </div>
+              
+              <div class="activity-item">
+                <div class="activity-dot gcp"></div>
+                <div class="activity-content">
+                  <strong>Cloud Storage Bucket</strong> configuration updated in <strong>Data Processing Pipeline</strong>
+                  <div class="activity-time">Yesterday, 4:30 PM by Alice King</div>
+                </div>
+              </div>
+              
+              <div class="activity-item">
+                <div class="activity-dot azure"></div>
+                <div class="activity-content">
+                  <strong>Azure Function</strong> deployed to <strong>Authentication Services</strong>
+                  <div class="activity-time">Yesterday, 11:20 AM by Mike Reed</div>
+                </div>
+              </div>
+              
+              <div class="activity-item">
+                <div class="activity-dot aws"></div>
+                <div class="activity-content">
+                  <strong>RDS Database</strong> backup completed in <strong>Production Environment</strong>
+                  <div class="activity-time">Apr 25, 2025, 2:15 AM (Automated)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Resource Usage -->
+        <div class="card small-card">
+          <div class="card-header">
+            <h3 class="card-title">Resource Usage</h3>
+          </div>
+          <div class="card-body">
+            <div class="progress-container">
+              <div class="progress-item">
+                <div class="progress-header">
+                  <span>Compute</span>
+                  <span>78%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width:78%; background-color:#4a6bdf;"></div>
+                </div>
+              </div>
+              
+              <div class="progress-item">
+                <div class="progress-header">
+                  <span>Storage</span>
+                  <span>45%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width:45%; background-color:#38b2ac;"></div>
+                </div>
+              </div>
+              
+              <div class="progress-item">
+                <div class="progress-header">
+                  <span>Network</span>
+                  <span>62%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width:62%; background-color:#ed8936;"></div>
+                </div>
+              </div>
+              
+              <div class="progress-item">
+                <div class="progress-header">
+                  <span>Memory</span>
+                  <span>36%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width:36%; background-color:#4a6bdf;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Cost Trends -->
+        <div class="card small-card">
+          <div class="card-header">
+            <h3 class="card-title">Cost Breakdown</h3>
+          </div>
+          <div class="card-body">
+            <div class="progress-container">
+              <div class="progress-item">
+                <div class="progress-header">
+                  <span>AWS</span>
+                  <span>$2,450</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width:45%; background-color:#FF9900;"></div>
+                </div>
+              </div>
+              
+              <div class="progress-item">
+                <div class="progress-header">
+                  <span>Google Cloud</span>
+                  <span>$1,830</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width:35%; background-color:#4285F4;"></div>
+                </div>
+              </div>
+              
+              <div class="progress-item">
+                <div class="progress-header">
+                  <span>Azure</span>
+                  <span>$960</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width:20%; background-color:#0089D6;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Resources -->
+        <div class="card full-card">
+          <div class="card-header">
+            <h3 class="card-title">Active Resources</h3>
+            <div class="card-action" id="viewAllResources">View All</div>
+          </div>
+          <div class="card-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Resource</th>
+                  <th>Type</th>
+                  <th>Workspace</th>
+                  <th>Status</th>
+                  <th>Last Updated</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>web-server-01</td>
+                  <td><span class="resource-type aws" style="width:auto;height:auto;padding:2px 6px;">EC2</span></td>
+                  <td>Production Environment</td>
+                  <td><span class="status-active" style="white-space:nowrap;">Running</span></td>
+                  <td>Today, 10:45 AM</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline">Manage</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>storage-data-pipeline</td>
+                  <td><span class="resource-type gcp" style="width:auto;height:auto;padding:2px 6px;">GCS</span></td>
+                  <td>Data Processing Pipeline</td>
+                  <td><span class="status-active" style="white-space:nowrap;">Available</span></td>
+                  <td>Yesterday, 4:30 PM</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline">Manage</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>auth-service-function</td>
+                  <td><span class="resource-type azure" style="width:auto;height:auto;padding:2px 6px;">FUNC</span></td>
+                  <td>Authentication Services</td>
+                  <td><span class="status-active" style="white-space:nowrap;">Running</span></td>
+                  <td>Yesterday, 11:20 AM</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline">Manage</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>production-db</td>
+                  <td><span class="resource-type aws" style="width:auto;height:auto;padding:2px 6px;">RDS</span></td>
+                  <td>Production Environment</td>
+                  <td><span class="status-active" style="white-space:nowrap;">Running</span></td>
+                  <td>Apr 25, 2025, 2:15 AM</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline">Manage</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <div class="toast-icon">✅</div>
+    <div class="toast-content">Operation completed successfully!</div>
+    <div class="toast-close" id="toastClose">✖</div>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Create New Workspace</div>
+        <button class="modal-close" id="modalClose">✖</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Workspace Name</label>
+          <input type="text" class="form-control" id="workspaceName" placeholder="Enter workspace name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cloud Provider</label>
+          <select class="form-select" id="cloudProvider">
+            <option value="aws">Amazon Web Services</option>
+            <option value="gcp">Google Cloud Platform</option>
+            <option value="azure">Microsoft Azure</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" id="workspaceDescription" rows="3" placeholder="Enter workspace description"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="modalCancel">Cancel</button>
+        <button class="btn btn-primary" id="modalCreate">Create</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Show toast notification
+    document.addEventListener('DOMContentLoaded', function() {
+      // Menu functionality
+      const menuItems = document.querySelectorAll('.menu-item');
+      menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+          menuItems.forEach(i => i.classList.remove('active'));
+          this.classList.add('active');
+          // Here you would add code to navigate between pages
+          showToast('Page changed to ' + this.dataset.page, 'toast-success');
+        });
+      });
+      
+      // Modal functions
+      const modalOverlay = document.getElementById('modalOverlay');
+      const createWorkspaceBtn = document.getElementById('createWorkspace');
+      const modalClose = document.getElementById('modalClose');
+      const modalCancel = document.getElementById('modalCancel');
+      const modalCreate = document.getElementById('modalCreate');
+      
+      createWorkspaceBtn.addEventListener('click', function() {
+        modalOverlay.classList.add('active');
+      });
+      
+      modalClose.addEventListener('click', function() {
+        modalOverlay.classList.remove('active');
+      });
+      
+      modalCancel.addEventListener('click', function() {
+        modalOverlay.classList.remove('active');
+      });
+      
+      modalCreate.addEventListener('click', function() {
+        const name = document.getElementById('workspaceName').value;
+        const provider = document.getElementById('cloudProvider').value;
+        
+        if(!name) {
+          showToast('Please enter a workspace name', 'toast-warning');
+          return;
+        }
+        
+        modalOverlay.classList.remove('active');
+        showToast('Workspace created successfully!', 'toast-success');
+        
+        // Reset form
+        document.getElementById('workspaceName').value = '';
+        document.getElementById('workspaceDescription').value = '';
+      });
+      
+      // Toast functions
+      const toast = document.getElementById('toast');
+      const toastClose = document.getElementById('toastClose');
+      
+      toastClose.addEventListener('click', function() {
+        toast.classList.remove('show');
+      });
+      
+      // Progress bar animation
+      const progressFills = document.querySelectorAll('.progress-fill');
+      progressFills.forEach(fill => {
+        const width = fill.style.width;
+        fill.style.width = '0';
+        setTimeout(() => {
+          fill.style.transition = 'width 1s ease-in-out';
+          fill.style.width = width;
+        }, 300);
+      });
+      
+      // Add event listeners to workspace cards
+      const workspaceCards = document.querySelectorAll('.workspace-card');
+      workspaceCards.forEach(card => {
+        card.addEventListener('click', function() {
+          showToast('Opening workspace: ' + this.dataset.workspace, 'toast-success');
+        });
+      });
+      
+      // Search functionality
+      const searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('keyup', function(e) {
+        if(e.key === 'Enter' && this.value.trim() !== '') {
+          showToast('Searching for: ' + this.value, 'toast-success');
+          this.value = '';
+        }
+      });
+      
+      // User menu
+      const userMenu = document.getElementById('userMenu');
+      userMenu.addEventListener('click', function() {
+        showToast('User profile options will appear here', 'toast-success');
+      });
+      
+      // View all links
+      document.getElementById('viewAllWorkspaces').addEventListener('click', function() {
+        showToast('Viewing all workspaces', 'toast-success');
+      });
+      
+      document.getElementById('viewAllActivity').addEventListener('click', function() {
+        showToast('Viewing all activity', 'toast-success');
+      });
+      
+      document.getElementById('viewAllResources').addEventListener('click', function() {
+        showToast('Viewing all resources', 'toast-success');
+      });
+    });
+    
+    function showToast(message, type = '') {
+      const toast = document.getElementById('toast');
+      const toastContent = toast.querySelector('.toast-content');
+      
+      // Remove all type classes
+      toast.className = 'toast';
+      // Add specified type
+      if(type) {
+        toast.classList.add(type);
+      }
+      
+      toastContent.textContent = message;
+      toast.classList.add('show');
+      
+      // Auto hide after 3 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

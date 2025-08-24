@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Gemini API Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #1a73e8;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: none;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #0d62c3;
+        }
+        
+        .response-container {
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            border-left: 5px solid #1a73e8;
+        }
+        
+        .response-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .response-text {
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+        
+        .spinner {
+            display: none;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1a73e8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: #d93025;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Google Gemini API Integration</h1>
+        
+        <div class="input-group">
+            <label for="api-key">Gemini API Key</label>
+            <input type="text" id="api-key" placeholder="Enter your Gemini API key">
+        </div>
+        
+        <div class="input-group">
+            <label for="prompt">Enter your prompt</label>
+            <textarea id="prompt" placeholder="Ask Gemini something..."></textarea>
+        </div>
+        
+        <button id="submit-btn">Get Response</button>
+        
+        <div class="spinner" id="loading-spinner"></div>
+        
+        <div id="error-message" class="error"></div>
+        
+        <div class="response-container" id="response-container" style="display: none;">
+            <div class="response-heading">
+                <h3>Gemini Response</h3>
+            </div>
+            <div class="response-text" id="response-text"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const apiKeyInput = document.getElementById('api-key');
+            const promptInput = document.getElementById('prompt');
+            const submitBtn = document.getElementById('submit-btn');
+            const responseContainer = document.getElementById('response-container');
+            const responseText = document.getElementById('response-text');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const errorMessage = document.getElementById('error-message');
+            
+            // Check if API key is saved in local storage
+            const savedApiKey = localStorage.getItem('gemini_api_key');
+            if (savedApiKey) {
+                apiKeyInput.value = savedApiKey;
+            }
+            
+            submitBtn.addEventListener('click', async () => {
+                const apiKey = apiKeyInput.value.trim();
+                const prompt = promptInput.value.trim();
+                
+                // Save API key to local storage
+                localStorage.setItem('gemini_api_key', apiKey);
+                
+                if (!apiKey) {
+                    showError('Please enter your Gemini API key');
+                    return;
+                }
+                
+                if (!prompt) {
+                    showError('Please enter a prompt');
+                    return;
+                }
+                
+                // Clear previous response and error
+                responseContainer.style.display = 'none';
+                errorMessage.textContent = '';
+                
+                // Show loading spinner
+                loadingSpinner.style.display = 'block';
+                
+                try {
+                    const result = await fetchGeminiResponse(apiKey, prompt);
+                    loadingSpinner.style.display = 'none';
+                    
+                    if (result) {
+                        responseText.textContent = result;
+                        responseContainer.style.display = 'block';
+                    }
+                } catch (error) {
+                    loadingSpinner.style.display = 'none';
+                    showError(error.message);
+                }
+            });
+            
+            async function fetchGeminiResponse(apiKey, prompt) {
+                // Using the Gemini API (assuming Pro 1.0 or similar model)
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+                
+                const requestBody = {
+                    contents: [
+                        {
+                            parts: [
+                                {
+                                    text: prompt
+                                }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        temperature: 0.7,
+                        maxOutputTokens: 2048
+                    }
+                };
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error?.message || 'Error connecting to Gemini API');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Extract the response text from the API response
+                    if (data.candidates && data.candidates[0]?.content?.parts && data.candidates[0].content.parts[0]?.text) {
+                        return data.candidates[0].content.parts[0].text;
+                    } else {
+                        throw new Error('Unexpected API response format');
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API:', error);
+                    throw new Error(`Failed to get response: ${error.message}`);
+                }
+            }
+            
+            function showError(message) {
+                errorMessage.textContent = message;
+            }
+        });
+    </script>
+</body>
+</html>

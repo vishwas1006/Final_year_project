@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudTicket - CST Management</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #94a3b8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        header {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .logo svg {
+            margin-right: 0.5rem;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        nav a:hover {
+            color: var(--primary);
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            z-index: 1;
+            margin-top: 0.5rem;
+        }
+        
+        .user-dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: block;
+            color: var(--dark);
+            border-bottom: 1px solid #e2e8f0;
+            transition: background-color 0.2s;
+        }
+        
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f8fafc;
+        }
+        
+        .user-info {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .user-role {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+        
+        main {
+            padding: 2rem 0;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 1.5rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn svg {
+            margin-right: 0.5rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #0da271;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--gray);
+            color: var(--dark);
+        }
+        
+        .btn-outline:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .notification-badge {
+            position: relative;
+        }
+        
+        .notification-badge::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 8px;
+            height: 8px;
+            background-color: var(--danger);
+            border-radius: 50%;
+        }
+        
+        .ticket-filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .tickets-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .ticket-item {
+            display: flex;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            background-color: #f8fafc;
+            border-left: 4px solid var(--gray);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .ticket-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .ticket-high {
+            border-left-color: var(--danger);
+        }
+        
+        .ticket-medium {
+            border-left-color: var(--warning);
+        }
+        
+        .ticket-low {
+            border-left-color: var(--success);
+        }
+        
+        .ticket-content {
+            flex: 1;
+        }
+        
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .ticket-id {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+        
+        .ticket-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .ticket-desc {
+            font-size: 0.875rem;
+            color: #64748b;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .ticket-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .ticket-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            background-color: #e2e8f0;
+            font-size: 0.75rem;
+        }
+        
+        .sidebar-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .analytics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            background-color: #f8fafc;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+        
+        .activity-list {
+            margin-top: 1rem;
+        }
+        
+        .activity-item {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e2e8f0;
+            flex-shrink: 0;
+        }
+        
+        .activity-created {
+            background-color: #dbeafe;
+            color: var(--primary);
+        }
+        
+        .activity-updated {
+            background-color: #fef3c7;
+            color: var(--warning);
+        }
+        
+        .activity-resolved {
+            background-color: #dcfce7;
+            color: var(--success);
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-text {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+            position: relative;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            background-color: white;
+            border-left: 4px solid var(--success);
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transform: translateX(120%);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast-success {
+            border-left-color: var(--success);
+        }
+        
+        .toast-error {
+            border-left-color: var(--danger);
+        }
+        
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .toast-success .toast-icon {
+            background-color: #dcfce7;
+            color: var(--success);
+        }
+        
+        .toast-error .toast-icon {
+            background-color: #fee2e2;
+            color: var(--danger);
+        }
+        
+        .search-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+        }
+        
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            color: var(--gray);
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3h.393a7.5 7.5 0 0 1 7.92 12.446A7.5 7.5 0 0 1 12 21h-.393A7.5 7.5 0 0 1 3.687 8.554 7.5 7.5 0 0 1 12 3Z"></path>
+                        <path d="M16 16h.01"></path>
+                        <path d="M12 16h.01"></path>
+                        <path d="M8 16h.01"></path>
+                    </svg>
+                    CloudTicket
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#" class="active">Dashboard</a></li>
+                        <li><a href="#">Tickets</a></li>
+                        <li><a href="#">Reports</a></li>
+                        <li><a href="#">Settings</a></li>
+                    </ul>
+                </nav>
+                <div class="user-menu">
+                    <button class="btn btn-outline notification-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                        </svg>
+                    </button>
+                    <div class="user-dropdown">
+                        <div class="avatar">User</div>
+                        <div class="dropdown-content">
+                            <div class="user-info">
+                                <div class="avatar" style="margin: 0 auto;">User</div>
+                                <div class="user-name">John Doe</div>
+                                <div class="user-role">System Administrator</div>
+                            </div>
+                            <a href="#" class="dropdown-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                My Profile
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;">
+                                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                Settings
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                </svg>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="dashboard">
+                <div class="main-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Service Tickets</h2>
+                            <button class="btn btn-primary" id="createTicketBtn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 5v14"></path>
+                                    <path d="M5 12h14"></path>
+                                </svg>
+                                New Ticket
+                            </button>
+                        </div>
+                        <div class="search-container">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" placeholder="Search tickets..." class="search-input" id="searchTickets">
+                        </div>
+                        <div class="ticket-filters">
+                            <button class="btn btn-outline active" id="filterAll">All</button>
+                            <button class="btn btn-outline" id="filterOpen">Open</button>
+                            <button class="btn btn-outline" id="filterInProgress">In Progress</button>
+                            <button class="btn btn-outline" id="filterResolved">Resolved</button>
+                            <button class="btn btn-outline" id="filterHigh">High Priority</button>
+                        </div>
+                        <div class="tickets-list" id="ticketsList">
+                            <div class="ticket-item ticket-high" data-id="CST-1092" data-status="open" data-priority="high">
+                                <div class="ticket-content">
+                                    <div class="ticket-header">
+                                        <h3 class="ticket-title">Database Connection Issues</h3>
+                                        <span class="ticket-id">#CST-1092</span>
+                                    </div>
+                                    <p class="ticket-desc">Users are experiencing intermittent connection drops to the main database cluster. Affects multiple regions. Urgent resolution needed.</p>
+                                    <div class="ticket-meta">
+                                        <div class="ticket-tags">
+                                            <span class="tag">Database</span>
+                                            <span class="tag">Production</span>
+                                        </div>
+                                        <span>2 hours ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ticket-item ticket-medium" data-id="CST-1091" data-status="in-progress" data-priority="medium">
+                                <div class="ticket-content">
+                                    <div class="ticket-header">
+                                        <h3 class="ticket-title">API Rate Limiting Issues</h3>
+                                        <span class="ticket-id">#CST-1091</span>
+                                    </div>
+                                    <p class="ticket-desc">Customer reporting that the rate limits are being applied incorrectly for their enterprise plan. Need to check configuration.</p>
+                                    <div class="ticket-meta">
+                                        <div class="ticket-tags">
+                                            <span class="tag">API</span>
+                                            <span class="tag">Configuration</span>
+                                        </div>
+                                        <span>4 hours ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ticket-item ticket-low" data-id="CST-1090" data-status="open" data-priority="low">
+                                <div class="ticket-content">
+                                    <div class="ticket-header">
+                                        <h3 class="ticket-title">Add New Admin User</h3>
+                                        <span class="ticket-id">#CST-1090</span>
+                                    </div>
+                                    <p class="ticket-desc">Request to add new administrator user for the marketing team. Details provided in the description.</p>
+                                    <div class="ticket-meta">
+                                        <div class="ticket-tags">
+                                            <span class="tag">User Management</span>
+                                            <span class="tag">Admin</span>
+                                        </div>
+                                        <span>Yesterday</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ticket-item ticket-medium" data-id="CST-1089" data-status="in-progress" data-priority="medium">
+                                <div class="ticket-content">
+                                    <div class="ticket-header">
+                                        <h3 class="ticket-title">Storage Scaling Request</h3>
+                                        <span class="ticket-id">#CST-1089</span>
+                                    </div>
+                                    <p class="ticket-desc">Need to increase storage allocation for the media processing pipeline. Current usage at 85% and growing.</p>
+                                    <div class="ticket-meta">
+                                        <div class="ticket-tags">
+                                            <span class="tag">Storage</span>
+                                            <span class="tag">Scaling</span>
+                                        </div>
+                                        <span>Yesterday</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ticket-item ticket-low" data-id="CST-1088" data-status="resolved" data-priority="low">
+                                <div class="ticket-content">
+                                    <div class="ticket-header">
+                                        <h3 class="ticket-title">SSL Certificate Renewal</h3>
+                                        <span class="ticket-id">#CST-1088</span>
+                                    </div>
+                                    <p class="ticket-desc">The SSL certificate for api.example.com expires in 3 weeks. Need to generate and deploy new certificate.</p>
+                                    <div class="ticket-meta">
+                                        <div class="ticket-tags">
+                                            <span class="tag">Security</span>
+                                            <span class="tag">Maintenance</span>
+                                        </div>
+                                        <span>2 days ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebar">
+                    <div class="sidebar-card">
+                        <h3 class="card-title">Analytics</h3>
+                        <div class="analytics">
+                            <div class="stat-card">
+                                <div class="stat-value" style="color: var(--primary);" id="openTicketsCount">18</div>
+                                <div class="stat-label">Open Tickets</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" style="color: var(--success);" id="resolvedCount">24</div>
+                                <div class="stat-label">Resolved Today</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" style="color: var(--warning);" id="inProgressCount">42</div>
+                                <div class="stat-label">In Progress</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" style="color: var(--danger);" id="highPriorityCount">7</div>
+                                <div class="stat-label">High Priority</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sidebar-card">
+                        <h3 class="card-title">Recent Activity</h3>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon activity-created">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 5v14"></path>
+                                        <path d="M5 12h14"></path>
+                                    </svg>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">New ticket created: <strong>Database Connection Issues</strong></div>
+                                    <div class="activity-time">2 hours ago</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon activity-updated">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">Updated ticket: <strong>API Rate Limiting Issues</strong></div>
+                                    <div class="activity-time">3 hours ago</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon activity-resolved">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 6 9 17l-5-5"></path>
+                                    </svg>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">Resolved ticket: <strong>SSL Certificate Renewal</strong></div>
+                                    <div class="activity-time">2 days ago</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon activity-created">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 5v14"></path>
+                                        <path d="M5 12h14"></path>
+                                    </svg>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">New ticket created: <strong>Storage Scaling Request</strong></div>
+                                    <div class="activity-time">Yesterday</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Create Ticket Modal -->
+    <div class="modal" id="createTicketModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Ticket</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="createTicketForm">
+                <div class="form-group">
+                    <label for="ticketTitle">Title</label>
+                    <input type="text" id="ticketTitle" required placeholder="Brief description of the issue">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ticketPriority">Priority</label>
+                        <select id="ticketPriority" required>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ticketType">Type</label>
+                        <select id="ticketType" required>
+                            <option value="incident">Incident</option>
+                            <option value="service-request">Service Request</option>
+                            <option value="problem">Problem</option>
+                            <option value="change">Change Request</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="ticketDescription">Description</label>
+                    <textarea id="ticketDescription" required placeholder="Detailed description of the issue, steps to reproduce, error messages, etc."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="assignedTo">Assign To</label>
+                        <select id="assignedTo">
+                            <option value="">Unassigned</option>
+                            <option value="john">John Doe</option>
+                            <option value="jane">Jane Smith</option>
+                            <option value="alex">Alex Johnson</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dueDate">Due Date</label>
+                        <input type="date" id="dueDate">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" id="cancelTicketBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast toast-success" id="notificationToast">
+        <div class="toast-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5"></path>
+            </svg>
+        </div>
+        <div class="toast-content">Ticket created successfully!</div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const createTicketBtn = document.getElementById('createTicketBtn');
+        const createTicketModal = document.getElementById('createTicketModal');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const cancelTicketBtn = document.getElementById('cancelTicketBtn');
+        const createTicketForm = document.getElementById('createTicketForm');
+        const notificationToast = document.getElementById('notificationToast');
+        const searchInput = document.getElementById('searchTickets');
+        const ticketsList = document.getElementById('ticketsList');
+        const filterButtons = document.querySelectorAll('.ticket-filters .btn');
+
+        // Show create ticket modal
+        createTicketBtn.addEventListener('click', () => {
+            createTicketModal.classList.add('active');
+        });
+
+        // Close modal on close button click
+        closeModalBtn.addEventListener('click', () => {
+            createTicketModal.classList.remove('active');
+        });
+
+        // Close modal on cancel button click
+        cancelTicketBtn.addEventListener('click', () => {
+            createTicketModal.classList.remove('active');
+        });
+
+        // Close modal when clicking outside of it
+        createTicketModal.addEventListener('click', (e) => {
+            if (e.target === createTicketModal) {
+                createTicketModal.classList.remove('active');
+            }
+        });
+
+        // Handle ticket creation
+        // Handle ticket creation
+    createTicketForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    // Get form values
+    const title = document.getElementById('ticketTitle').value;
+    const priority = document.getElementById('ticketPriority').value;
+    const description = document.getElementById('ticketDescription').value;
+    const type = document.getElementById('ticketType').value;
+    
+    // Generate a random ticket ID
+    const ticketId = `CST-${Math.floor(1000 + Math.random() * 9000)}`;
+    
+    // Create new ticket element
+    const ticketElement = document.createElement('div');
+    ticketElement.className = `ticket-item ticket-${priority}`;
+    ticketElement.dataset.id = ticketId;
+    ticketElement.dataset.status = 'open';
+    ticketElement.dataset.priority = priority;
+    
+    ticketElement.innerHTML = `
+        <div class="ticket-content">
+            <div class="ticket-header">
+                <h3 class="ticket-title">${title}</h3>
+                <span class="ticket-id">#${ticketId}</span>
+            </div>
+            <p class="ticket-desc">${description}</p>
+            <div class="ticket-meta">
+                <div class="ticket-tags">
+                    <span class="tag">${type}</span>
+                </div>
+                <span>Just now</span>
+            </div>
+        </div>
+    `;
+    
+    // Add click event to the new ticket
+    ticketElement.addEventListener('click', () => {
+        alert(`Viewing ticket ${ticketId}`);
+    });
+    
+    // Add the new ticket to the beginning of the list
+    ticketsList.insertBefore(ticketElement, ticketsList.firstChild);
+    
+    // Update ticket counts
+    const openTicketsCount = document.getElementById('openTicketsCount');
+    if (openTicketsCount) {
+        openTicketsCount.textContent = parseInt(openTicketsCount.textContent) + 1;
+    }
+    
+    // If it's high priority, update that count too
+    if (priority === 'high') {
+        const highPriorityCount = document.getElementById('highPriorityCount');
+        if (highPriorityCount) {
+            highPriorityCount.textContent = parseInt(highPriorityCount.textContent) + 1;
+        }
+    }
+    
+    // Add to recent activity
+    const activityList = document.querySelector('.activity-list');
+    if (activityList) {
+        const activityItem = document.createElement('div');
+        activityItem.className = 'activity-item';
+        activityItem.innerHTML = `
+            <div class="activity-icon activity-created">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 5v14"></path>
+                    <path d="M5 12h14"></path>
+                </svg>
+            </div>
+            <div class="activity-content">
+                <div class="activity-text">New ticket created: <strong>${title}</strong></div>
+                <div class="activity-time">Just now</div>
+            </div>
+        `;
+        activityList.insertBefore(activityItem, activityList.firstChild);
+    }
+    
+    // Close the modal
+    createTicketModal.classList.remove('active');
+    
+    // Show success notification
+    notificationToast.classList.add('show');
+    setTimeout(() => {
+        notificationToast.classList.remove('show');
+    }, 3000);
+    
+    // Reset form
+    createTicketForm.reset();
+});
+
+        // Filter tickets
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                button.classList.add('active');
+                
+                const filter = button.id.replace('filter', '').toLowerCase();
+                
+                // Filter tickets
+                const tickets = document.querySelectorAll('.ticket-item');
+                tickets.forEach(ticket => {
+                    if (filter === 'all') {
+                        ticket.style.display = 'flex';
+                    } else if (filter === 'high') {
+                        if (ticket.dataset.priority === 'high') {
+                            ticket.style.display = 'flex';
+                        } else {
+                            ticket.style.display = 'none';
+                        }
+                    } else {
+                        if (ticket.dataset.status === filter.toLowerCase()) {
+                            ticket.style.display = 'flex';
+                        } else {
+                            ticket.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        });
+
+        // Search tickets
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const tickets = document.querySelectorAll('.ticket-item');
+            
+            tickets.forEach(ticket => {
+                const title = ticket.querySelector('.ticket-title').textContent.toLowerCase();
+                const desc = ticket.querySelector('.ticket-desc').textContent.toLowerCase();
+                const id = ticket.querySelector('.ticket-id').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || desc.includes(searchTerm) || id.includes(searchTerm)) {
+                    ticket.style.display = 'flex';
+                } else {
+                    ticket.style.display = 'none';
+                }
+            });
+        });
+
+        // Ticket click event
+        const ticketItems = document.querySelectorAll('.ticket-item');
+        ticketItems.forEach(ticket => {
+            ticket.addEventListener('click', () => {
+                // Here you would typically navigate to the ticket detail page
+                // or open a ticket detail modal
+                alert(`Viewing ticket ${ticket.dataset.id}`);
+            });
+        });
+    </script>
+</body>
+</html>

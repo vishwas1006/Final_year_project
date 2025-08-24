@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudConnect - AWS Project Portal</title>
+    <style>
+        :root {
+            --primary: #232F3E;
+            --secondary: #FF9900;
+            --light: #f8f9fa;
+            --dark: #232F3E;
+            --success: #00A1C9;
+            --danger: #D13212;
+            --border-radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f0f2f5;
+            color: #333;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .page.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-button {
+            background: transparent;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-button.primary {
+            background: var(--secondary);
+            color: var(--dark);
+        }
+
+        .nav-button.primary:hover {
+            background: #e68a00;
+        }
+
+        /* Welcome Page Styles */
+        .welcome-page {
+            flex-direction: column;
+            background-color: white;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, #37475A 100%);
+            color: white;
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title span {
+            color: var(--secondary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features-section {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 3rem;
+            color: var(--dark);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .feature-description {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #f0f2f5 0%, #e6e9ec 100%);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .cta-button {
+            background: var(--secondary);
+            color: var(--dark);
+            font-size: 1rem;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(255, 153, 0, 0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 153, 0, 0.3);
+            background: #e68a00;
+        }
+
+        /* Auth Pages Styles */
+        .auth-page {
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: #f0f2f5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            padding: 2.5rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-title {
+            font-size: 1.75rem;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-subtitle {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.2);
+            background: white;
+        }
+
+        form button {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #666;
+        }
+
+        .auth-link {
+            color: var(--success);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            background: white;
+            color: #333;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--secondary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .contributors {
+            margin-top: 1.5rem;
+        }
+
+        .contributors h3 {
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+        }
+
+        .contributors p {
+            margin: 0.2rem 0;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            .container {
+                padding: 1.5rem;
+            }
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- Google Sign-in Popup Overlay -->
+    <div id="google-signin-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 2000; display: none; justify-content: center; align-items: center;">
+        <div style="background-color: white; padding: 30px; border-radius: 10px; width: 400px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            <div class="logo">
+                <span style="color: #000000;">Easy</span><span style="color: #FF9900;">Go</span>
+              </div>
+            <h2 style="margin: 20px 0;">Sign in to continue</h2>
+            <p style="margin-bottom: 30px; color: #555;">Use your Google account for quick access</p>
+            <button id="google-signin-popup-btn" style="background-color: #4285F4; color: white; border: none; border-radius: 8px; padding: 12px 24px; font-size: 16px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; width: 80%;">
+                Sign in with Google
+            </button>
+            <p style="margin-top: 20px; font-size: 14px;">
+                <a href="#" id="close-signin-popup" style="color: #666; text-decoration: underline;">Dismiss</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">Easy<span>Go</span></div>
+        <div class="nav-links">
+            <button class="nav-button" onclick="navigateToPage('welcomePage')">Home</button>
+            <button class="nav-button" onclick="navigateToPage('loginPage')">Login</button>
+            <button class="nav-button primary" onclick="navigateToPage('registrationPage')">Sign Up</button>
+            
+        </div>
+      <button class="cta-button user-type-btn" onclick="openGoogleSignInPopup()">Google Sign</button>
+    </header>
+
+    <!-- Welcome Page -->
+    <div class="page welcome-page active" id="welcomePage">
+        <div class="hero">
+            <h1 class="hero-title">Welcome to Cloud<span>Connect</span></h1>
+            <p class="hero-subtitle">A powerful platform built on AWS for seamless cloud solutions. Experience next-generation digital innovation with enterprise-grade security and performance.</p>
+            <button class="cta-button" onclick="navigateToPage('registrationPage')">Get Started</button>
+            <button class="cta-button user-type-btn" onclick="window.location.href='i.html'">User Type</button>
+        </div>
+        
+        <div class="features-section">
+            <h2 class="section-title">Why Choose CloudConnect</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3 class="feature-title">AWS Powered Performance</h3>
+                    <p class="feature-description">Built on Amazon Web Services infrastructure for unmatched reliability, scalability, and speed.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3 class="feature-title">Enterprise Security</h3>
+                    <p class="feature-description">Bank-grade security with end-to-end encryption and AWS security features to protect your valuable data.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💡</div>
+                    <h3 class="feature-title">Intelligent Solutions</h3>
+                    <p class="feature-description">Leveraging AWS AI/ML services to provide smart features that adapt to your business needs.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3 class="feature-title">Scalable Architecture</h3>
+                    <p class="feature-description">Grows with your business needs without compromising on performance or reliability.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Serverless Technology</h3>
+                    <p class="feature-description">Built on AWS Lambda and other serverless technologies for cost-effective, scalable operations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3 class="feature-title">Continuous Integration</h3>
+                    <p class="feature-description">Always up-to-date with automatic updates and seamless integration with your existing tools.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cta-section">
+            <h2 class="section-title">Ready to Transform Your Business?</h2>
+            <button class="cta-button" onclick="navigateToPage('registrationPage')">Join CloudConnect Today</button>
+        </div>
+        
+        <footer>
+            <p>© 2025 CloudConnect - An AWS-Powered Solution</p>
+            <div class="contributors">
+                <h3>Project Contributors:</h3>
+                <p>Shivalingu K G</p>
+                <p>Vishwas S</p>
+                <p>Yashas K Y</p>
+                <p>Pavan Gowda M S</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Registration Page -->
+    <div class="page auth-page" id="registrationPage">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+        </div>
+        <div class="notification"></div>
+        <div class="container">
+            <div class="auth-header">
+                <h1 class="auth-title">Create Account</h1>
+                <p class="auth-subtitle">Join CloudConnect to get started</p>
+            </div>
+            <form id="registrationForm">
+                <div class="input-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <button type="submit" class="cta-button">Create Account</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Ensure all elements are loaded before attaching event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navigation function
+            window.navigateToPage = function(pageId) {
+                console.log("Navigating to:", pageId); // Debug log
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.getElementById(pageId).classList.add('active');
+            };
+
+            // Show notification function
+            function showNotification(message, isSuccess) {
+                const notification = document.querySelector('.notification');
+                notification.textContent = message;
+                notification.className = 'notification'; // Reset classes
+                notification.classList.add(isSuccess ? 'success' : 'error');
+                notification.style.display = 'block';
+                
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            }
+
+            // Check if user is already logged in
+            const userData = localStorage.getItem('userData');
+            if (userData) {
+                // If we had a dashboard page, we would redirect here
+                // For now, just show a notification
+                showNotification('Welcome back!', true);
+            }
+
+            // Registration form handler
+            const registrationForm = document.getElementById('registrationForm');
+            if (registrationForm) {
+                registrationForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    
+                    const loading = document.querySelector('.loading');
+                    loading.style.display = 'flex';
+
+                    const formData = {
+                        name: document.getElementById('name').value,
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('phone').value,
+                        password: document.getElementById('password').value
+                    };
+
+                    // API endpoint for registration
+                    fetch('https://ggmm2efv50.execute-api.us-east-1.amazonaws.com/prod/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Registration failed');
+                        }
+                        return response.text();
+                    })
+                    .then(() => {
+                        // Store user data
+                        localStorage.setItem('userData', JSON.stringify(formData));
+                        showNotification('Registration successful!', true);
+                        
+                        // Redirect to dashboard.html after successful registration
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1500);
+                    })
+                    .catch(error => {
+                        showNotification('Registration failed: ' + error.message, false);
+                    })
+                    .finally(() => {
+                        loading.style.display = 'none';
+                    });
+                });
+            }
+
+            // Login form handler
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    
+                    const loading = document.querySelector('.loading');
+                    loading.style.display = 'flex';
+
+                    const loginData = {
+                        email: document.getElementById('loginEmail').value,
+                        password: document.getElementById('loginPassword').value
+                    };
+
+                    // API endpoint for login
+                    fetch('https://binqgx0usa.execute-api.eu-north-1.amazonaws.com/prod/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(loginData)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Login failed');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Store user data
+                        localStorage.setItem('userData', JSON.stringify(data));
+                        showNotification('Login successful!', true);
+                        
+                        // Redirect to dashboard.html
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1500);
+                    })
+                    .catch(error => {
+                        showNotification('Login failed: ' + error.message, false);
+                    })
+                    .finally(() => {
+                        loading.style.display = 'none';
+                    });
+                });
+            }
+
+            // Test button functionality
+            const testButtons = document.querySelectorAll('.cta-button, .nav-button');
+            testButtons.forEach(button => {
+                const originalOnclick = button.onclick;
+                button.onclick = function(event) {
+                    console.log('Button clicked:', button.textContent.trim());
+                    if (originalOnclick) {
+                        originalOnclick.call(this, event);
+                    }
+                };
+            });
+            
+            // Automatically show Google sign-in popup every 3 seconds
+            let popupInterval;
+            let popupCounter = 0;
+            const maxPopups = 5; // Maximum number of times to show the popup
+
+            function showGoogleSignInPopup() {
+                const overlay = document.getElementById('google-signin-overlay');
+                overlay.style.display = 'flex';
+            }
+
+            function setupGooglePopup() {
+                const overlay = document.getElementById('google-signin-overlay');
+                const closeButton = document.getElementById('close-signin-popup');
+                const signInButton = document.getElementById('google-signin-popup-btn');
+                
+                // Close button handler
+                closeButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    overlay.style.display = 'none';
+                    clearInterval(popupInterval); // Stop showing popups after user dismisses
+                });
+                
+                // Sign in button handler
+                signInButton.addEventListener('click', function() {
+                    window.location.href = 'google.html';
+                });
+                
+                // Start the popup interval
+                popupInterval = setInterval(function() {
+                    popupCounter++;
+                    if (popupCounter <= maxPopups) {
+                        showGoogleSignInPopup();
+                    } else {
+                        clearInterval(popupInterval); // Stop showing popups after reaching max
+                    }
+                }, 3000); // Show every 3 seconds
+            }
+            
+            // Setup the Google popup functionality
+            setupGooglePopup();
+        });
+        
+        // Google Sign-in popup function for the header button
+        function openGoogleSignInPopup() {
+            // Define popup dimensions and position
+            const width = 500;
+            const height = 600;
+            const left = (window.innerWidth - width) / 2;
+            const top = (window.innerHeight - height) / 2;
+            
+            // Open the popup window
+            const popup = window.open('google.html', 'googleSignIn', 
+                `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+            
+            // Focus on the popup
+            if (popup) {
+                popup.focus();
+            } else {
+                // If popup is blocked, show notification
+                showNotification('Please allow popups for this site to use Google Sign-in', false);
+            }
+            
+            // Optional: Handle messages from the popup
+            window.addEventListener('message', function(event) {
+                // Only accept messages from your own domain for security
+                if (event.origin !== window.location.origin) return;
+                
+                if (event.data.type === 'googleSignIn') {
+                    // Process the sign in data
+                    const userData = event.data.userData;
+                    localStorage.setItem('userData', JSON.stringify(userData));
+                    showNotification('Google Sign-in successful!', true);
+                    
+                    // Redirect to dashboard after successful sign-in
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

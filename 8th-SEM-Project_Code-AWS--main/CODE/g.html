@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Authentication - One Tap</title>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        #custom-google-btn {
+            background-color: white;
+            color: #757575;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 20px auto;
+            transition: background-color 0.3s;
+        }
+        
+        #custom-google-btn:hover {
+            background-color: #f5f5f5;
+        }
+        
+        #custom-google-btn img {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        #user-info {
+            margin-top: 20px;
+            display: none;
+            text-align: left;
+        }
+        
+        #profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: block;
+        }
+        
+        #logout-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .user-detail {
+            margin-bottom: 10px;
+        }
+        
+        .user-detail span {
+            font-weight: bold;
+        }
+        
+        #status {
+            margin-top: 20px;
+            color: #666;
+        }
+        
+        #status.error {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Google Authentication</h1>
+        
+        <!-- Google Identity Services button container -->
+        <div id="g_id_onload"
+             data-client_id="737933662421-c37d1v14e25rla8esvdftbj3737tUser00.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse">
+        </div>
+        <div class="g_id_signin" data-type="standard"></div>
+        
+        <!-- Custom button as fallback -->
+        <button id="custom-google-btn" style="display: none;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo">
+            Sign in with Google
+        </button>
+        
+        <!-- User information display -->
+        <div id="user-info">
+            <img id="profile-pic" src="" alt="Profile picture">
+            <div class="user-detail">Name: <span id="user-name"></span></div>
+            <div class="user-detail">Email: <span id="user-email"></span></div>
+            <button id="logout-btn">Sign Out</button>
+        </div>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        // Your Google client ID
+        const CLIENT_ID = '737933662421-c37d1v14e25rla8esvdftbj3737tUser00.apps.googleusercontent.com';
+        
+        // Load the Google Identity Services SDK
+        function loadGoogleIdentityServices() {
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.async = true;
+            script.defer = true;
+            script.onload = () => {
+                updateStatus('Google Identity Services loaded successfully');
+                initGoogleIdentity();
+            };
+            script.onerror = () => {
+                updateStatus('Failed to load Google Identity Services. Falling back to custom button.', true);
+                showCustomButton();
+            };
+            document.head.appendChild(script);
+        }
+        
+        // Initialize Google Identity
+        function initGoogleIdentity() {
+            try {
+                // Initialize Google Identity Services
+                window.onGoogleLibraryLoad = () => {
+                    google.accounts.id.initialize({
+                        client_id: CLIENT_ID,
+                        callback: handleCredentialResponse
+                    });
+                    
+                    // Render the button
+                    google.accounts.id.renderButton(
+                        document.querySelector('.g_id_signin'),
+                        { theme: 'outline', size: 'large', width: 240 }
+                    );
+                    
+                    // Display One Tap prompt if not on mobile
+                    if (!isMobile()) {
+                        google.accounts.id.prompt();
+                    }
+                };
+            } catch (error) {
+                updateStatus('Error initializing Google Identity: ' + error.message, true);
+                showCustomButton();
+            }
+        }
+        
+        // Show custom button as fallback
+        function showCustomButton() {
+            document.getElementById('custom-google-btn').style.display = 'flex';
+            document.getElementById('custom-google-btn').addEventListener('click', () => {
+                window.location.href = `https://accounts.google.com/o/oauth2/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}&response_type=token&scope=email%20profile`;
+            });
+        }
+        
+        // Handle the credential response
+        function handleCredentialResponse(response) {
+            try {
+                // Decode the JWT token
+                const payload = parseJwt(response.credential);
+                
+                // Display user info
+                document.getElementById('profile-pic').src = payload.picture;
+                document.getElementById('user-name').textContent = payload.name;
+                document.getElementById('user-email').textContent = payload.email;
+                
+                // Show/hide elements
+                document.getElementById('user-info').style.display = 'block';
+                document.getElementById('logout-btn').style.display = 'block';
+                document.querySelector('.g_id_signin').style.display = 'none';
+                document.getElementById('custom-google-btn').style.display = 'none';
+                
+                // Set up logout
+                document.getElementById('logout-btn').addEventListener('click', handleSignOut);
+                
+                updateStatus('Successfully signed in as ' + payload.email);
+                
+                // Store the token in localStorage (you'd typically send this to your server)
+                localStorage.setItem('google_auth_token', response.credential);
+                
+                console.log("JWT payload:", payload);
+            } catch (error) {
+                updateStatus('Error processing sign-in: ' + error.message, true);
+            }
+        }
+        
+        // Parse JWT token
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+        
+        // Handle sign out
+        function handleSignOut() {
+            try {
+                // Clear local storage
+                localStorage.removeItem('google_auth_token');
+                
+                // Reset UI
+                document.getElementById('user-info').style.display = 'none';
+                document.getElementById('logout-btn').style.display = 'none';
+                document.querySelector('.g_id_signin').style.display = 'block';
+                
+                updateStatus('Signed out successfully');
+                
+                // If Google Identity Services is loaded
+                if (window.google && google.accounts && google.accounts.id) {
+                    google.accounts.id.disableAutoSelect();
+                }
+                
+                // Reload the page to reset the Google Sign-In state
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } catch (error) {
+                updateStatus('Error signing out: ' + error.message, true);
+            }
+        }
+        
+        // Check if device is mobile
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // Update status message
+        function updateStatus(message, isError = false) {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            if (isError) {
+                statusElement.className = 'error';
+            } else {
+                statusElement.className = '';
+            }
+            console.log(isError ? 'ERROR: ' : 'STATUS: ', message);
+        }
+        
+        // On page load
+        window.onload = function() {
+            updateStatus('Loading Google authentication...');
+            
+            // Check if there's a token in localStorage
+            const token = localStorage.getItem('google_auth_token');
+            if (token) {
+                try {
+                    // Verify it's still valid
+                    const payload = parseJwt(token);
+                    const currentTime = Math.floor(Date.now() / 1000);
+                    
+                    if (payload.exp && payload.exp > currentTime) {
+                        // Token still valid, show user info
+                        handleCredentialResponse({ credential: token });
+                    } else {
+                        // Token expired, remove it
+                        localStorage.removeItem('google_auth_token');
+                        loadGoogleIdentityServices();
+                    }
+                } catch (error) {
+                    // Invalid token
+                    localStorage.removeItem('google_auth_token');
+                    loadGoogleIdentityServices();
+                }
+            } else {
+                loadGoogleIdentityServices();
+            }
+        };
+    </script>
+</body>
+</html>

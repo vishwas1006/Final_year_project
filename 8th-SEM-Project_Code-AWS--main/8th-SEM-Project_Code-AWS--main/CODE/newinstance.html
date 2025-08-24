@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Instance Creator</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: var(--gray-800);
+      background-color: #f9fafb;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 16px 0;
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      font-size: 1.875rem;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      color: var(--gray-800);
+      margin-top: 24px;
+      margin-bottom: 16px;
+    }
+
+    p {
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .provider-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      margin-bottom: 24px;
+    }
+
+    .provider-tab {
+      padding: 12px 24px;
+      cursor: pointer;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+    }
+
+    .provider-tab.active {
+      border-bottom: 2px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--gray-700);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      font-size: 1rem;
+      color: var(--gray-800);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .log-window {
+      background-color: var(--gray-900);
+      color: white;
+      padding: 16px;
+      border-radius: 6px;
+      font-family: monospace;
+      height: 200px;
+      overflow-y: auto;
+      margin-top: 24px;
+    }
+
+    .log-window p {
+      margin: 4px 0;
+      font-size: 0.875rem;
+    }
+
+    .log-success {
+      color: #4ade80;
+    }
+
+    .log-error {
+      color: #f87171;
+    }
+
+    .log-warning {
+      color: #fbbf24;
+    }
+
+    .log-info {
+      color: #60a5fa;
+    }
+
+    .notification {
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .notification.success {
+      background-color: #d1fae5;
+      border: 1px solid #a7f3d0;
+      color: #047857;
+      display: block;
+    }
+
+    .notification.error {
+      background-color: #fee2e2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      display: block;
+    }
+
+    .instance-list {
+      margin-top: 48px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    th {
+      background-color: var(--gray-100);
+      font-weight: 500;
+      color: var(--gray-700);
+    }
+
+    tr:hover {
+      background-color: var(--gray-100);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .badge-success {
+      background-color: #d1fae5;
+      color: #047857;
+    }
+
+    .badge-warning {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-danger {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .action-button {
+      background-color: transparent;
+      color: var(--primary);
+      padding: 4px 8px;
+      font-size: 0.875rem;
+    }
+
+    .action-button:hover {
+      background-color: var(--gray-100);
+    }
+
+    @media (max-width: 768px) {
+      .provider-tabs {
+        flex-wrap: wrap;
+      }
+      
+      .provider-tab {
+        padding: 10px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Cloud Instance Creator</h1>
+      <p>Create and manage virtual machine instances across multiple cloud providers</p>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="notification" class="notification"></div>
+
+    <div class="card">
+      <div class="provider-tabs">
+        <div class="provider-tab active" data-tab="aws">AWS EC2</div>
+        <div class="provider-tab" data-tab="gcp">Google Cloud</div>
+        <div class="provider-tab" data-tab="azure">Azure</div>
+        <div class="provider-tab" data-tab="do">DigitalOcean</div>
+      </div>
+
+      <div id="aws-tab" class="tab-content active">
+        <h2>Create AWS EC2 Instance</h2>
+        <form id="aws-form">
+          <div class="form-group">
+            <label for="aws-region">Region</label>
+            <select id="aws-region" required>
+              <option value="us-east-1">US East (N. Virginia)</option>
+              <option value="us-east-2">US East (Ohio)</option>
+              <option value="us-west-1">US West (N. California)</option>
+              <option value="us-west-2">US West (Oregon)</option>
+              <option value="eu-west-1">EU (Ireland)</option>
+              <option value="eu-central-1">EU (Frankfurt)</option>
+              <option value="ap-southeast-1">Asia Pacific (Singapore)</option>
+              <option value="ap-northeast-1">Asia Pacific (Tokyo)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="aws-instance-type">Instance Type</label>
+            <select id="aws-instance-type" required>
+              <option value="t2.micro">t2.micro (1 vCPU, 1 GiB RAM)</option>
+              <option value="t2.small">t2.small (1 vCPU, 2 GiB RAM)</option>
+              <option value="t2.medium">t2.medium (2 vCPU, 4 GiB RAM)</option>
+              <option value="t3.micro">t3.micro (2 vCPU, 1 GiB RAM)</option>
+              <option value="t3.small">t3.small (2 vCPU, 2 GiB RAM)</option>
+              <option value="m5.large">m5.large (2 vCPU, 8 GiB RAM)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="aws-ami">Amazon Machine Image (AMI)</label>
+            <select id="aws-ami" required>
+              <option value="ami-0c55b159cbfafe1f0">Amazon Linux 2 AMI</option>
+              <option value="ami-0ff8a91507f77f867">Ubuntu 20.04 LTS</option>
+              <option value="ami-0b0af3577fe5e3532">Red Hat Enterprise Linux 8</option>
+              <option value="ami-0947d2ba12ee1ff75">Windows Server 2019</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="aws-instance-name">Instance Name</label>
+            <input type="text" id="aws-instance-name" placeholder="my-ec2-instance" required>
+          </div>
+
+          <div class="form-group">
+            <label for="aws-key-pair">Key Pair</label>
+            <select id="aws-key-pair">
+              <option value="create-new">Create new key pair</option>
+              <option value="existing-key">Use existing key pair</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="aws-security-group">Security Group</label>
+            <select id="aws-security-group">
+              <option value="default">Default (Allow SSH)</option>
+              <option value="web-server">Web Server (Allow HTTP/HTTPS)</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+
+          <div class="button-group">
+            <button type="submit">Create Instance</button>
+            <button type="button" id="aws-advanced-settings">Advanced Settings</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="gcp-tab" class="tab-content">
+        <h2>Create Google Cloud VM Instance</h2>
+        <form id="gcp-form">
+          <div class="form-group">
+            <label for="gcp-project">Project ID</label>
+            <input type="text" id="gcp-project" placeholder="my-project-id" required>
+          </div>
+
+          <div class="form-group">
+            <label for="gcp-region">Region</label>
+            <select id="gcp-region" required>
+              <option value="us-central1">US Central (Iowa)</option>
+              <option value="us-east1">US East (South Carolina)</option>
+              <option value="us-west1">US West (Oregon)</option>
+              <option value="europe-west1">Europe West (Belgium)</option>
+              <option value="asia-east1">Asia East (Taiwan)</option>
+              <option value="asia-southeast1">Asia Southeast (Singapore)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="gcp-zone">Zone</label>
+            <select id="gcp-zone" required>
+              <option value="us-central1-a">us-central1-a</option>
+              <option value="us-central1-b">us-central1-b</option>
+              <option value="us-central1-c">us-central1-c</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="gcp-machine-type">Machine Type</label>
+            <select id="gcp-machine-type" required>
+              <option value="e2-micro">e2-micro (2 vCPU, 1 GB RAM)</option>
+              <option value="e2-small">e2-small (2 vCPU, 2 GB RAM)</option>
+              <option value="e2-medium">e2-medium (2 vCPU, 4 GB RAM)</option>
+              <option value="n1-standard-1">n1-standard-1 (1 vCPU, 3.75 GB RAM)</option>
+              <option value="n1-standard-2">n1-standard-2 (2 vCPU, 7.5 GB RAM)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="gcp-image">Boot Disk Image</label>
+            <select id="gcp-image" required>
+              <option value="debian-cloud/debian-11">Debian 11</option>
+              <option value="ubuntu-os-cloud/ubuntu-2004-lts">Ubuntu 20.04 LTS</option>
+              <option value="centos-cloud/centos-8">CentOS 8</option>
+              <option value="windows-cloud/windows-2019">Windows Server 2019</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="gcp-instance-name">Instance Name</label>
+            <input type="text" id="gcp-instance-name" placeholder="my-vm-instance" required>
+          </div>
+
+          <div class="button-group">
+            <button type="submit">Create Instance</button>
+            <button type="button" id="gcp-advanced-settings">Advanced Settings</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="azure-tab" class="tab-content">
+        <h2>Create Azure Virtual Machine</h2>
+        <form id="azure-form">
+          <div class="form-group">
+            <label for="azure-subscription">Subscription</label>
+            <select id="azure-subscription" required>
+              <option value="subscription-1">My Subscription</option>
+              <option value="subscription-2">Development Subscription</option>
+              <option value="subscription-3">Production Subscription</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="azure-resource-group">Resource Group</label>
+            <select id="azure-resource-group">
+              <option value="create-new">Create new resource group</option>
+              <option value="existing-group">Use existing resource group</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="azure-new-resource-group">
+            <label for="azure-resource-group-name">New Resource Group Name</label>
+            <input type="text" id="azure-resource-group-name" placeholder="my-resource-group">
+          </div>
+
+          <div class="form-group">
+            <label for="azure-region">Region</label>
+            <select id="azure-region" required>
+              <option value="eastus">East US</option>
+              <option value="eastus2">East US 2</option>
+              <option value="westus">West US</option>
+              <option value="westus2">West US 2</option>
+              <option value="northeurope">North Europe</option>
+              <option value="westeurope">West Europe</option>
+              <option value="southeastasia">Southeast Asia</option>
+              <option value="eastasia">East Asia</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="azure-vm-size">VM Size</label>
+            <select id="azure-vm-size" required>
+              <option value="Standard_B1s">Standard_B1s (1 vCPU, 1 GB RAM)</option>
+              <option value="Standard_B2s">Standard_B2s (2 vCPU, 4 GB RAM)</option>
+              <option value="Standard_D2s_v3">Standard_D2s_v3 (2 vCPU, 8 GB RAM)</option>
+              <option value="Standard_D4s_v3">Standard_D4s_v3 (4 vCPU, 16 GB RAM)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="azure-image">Image</label>
+            <select id="azure-image" required>
+              <option value="Canonical:UbuntuServer:18.04-LTS:latest">Ubuntu Server 18.04 LTS</option>
+              <option value="Canonical:UbuntuServer:20.04-LTS:latest">Ubuntu Server 20.04 LTS</option>
+              <option value="MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest">Windows Server 2019 Datacenter</option>
+              <option value="RedHat:RHEL:8:latest">Red Hat Enterprise Linux 8</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="azure-vm-name">VM Name</label>
+            <input type="text" id="azure-vm-name" placeholder="my-azure-vm" required>
+          </div>
+
+          <div class="button-group">
+            <button type="submit">Create Instance</button>
+            <button type="button" id="azure-advanced-settings">Advanced Settings</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="do-tab" class="tab-content">
+        <h2>Create DigitalOcean Droplet</h2>
+        <form id="do-form">
+          <div class="form-group">
+            <label for="do-region">Region</label>
+            <select id="do-region" required>
+              <option value="nyc1">New York 1</option>
+              <option value="nyc3">New York 3</option>
+              <option value="sfo2">San Francisco 2</option>
+              <option value="sfo3">San Francisco 3</option>
+              <option value="ams3">Amsterdam 3</option>
+              <option value="sgp1">Singapore 1</option>
+              <option value="lon1">London 1</option>
+              <option value="fra1">Frankfurt 1</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="do-size">Droplet Size</label>
+            <select id="do-size" required>
+              <option value="s-1vcpu-1gb">Basic: 1 vCPU, 1 GB RAM, 25 GB SSD</option>
+              <option value="s-1vcpu-2gb">Basic: 1 vCPU, 2 GB RAM, 50 GB SSD</option>
+              <option value="s-2vcpu-2gb">Basic: 2 vCPU, 2 GB RAM, 60 GB SSD</option>
+              <option value="s-2vcpu-4gb">Basic: 2 vCPU, 4 GB RAM, 80 GB SSD</option>
+              <option value="s-4vcpu-8gb">Basic: 4 vCPU, 8 GB RAM, 160 GB SSD</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="do-image">Image</label>
+            <select id="do-image" required>
+              <option value="ubuntu-20-04-x64">Ubuntu 20.04 x64</option>
+              <option value="ubuntu-22-04-x64">Ubuntu 22.04 x64</option>
+              <option value="debian-11-x64">Debian 11 x64</option>
+              <option value="centos-7-x64">CentOS 7 x64</option>
+              <option value="fedora-36-x64">Fedora 36 x64</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="do-name">Droplet Name</label>
+            <input type="text" id="do-name" placeholder="my-droplet" required>
+          </div>
+
+          <div class="form-group">
+            <label for="do-ssh-keys">SSH Keys</label>
+            <select id="do-ssh-keys">
+              <option value="upload-new">Upload new SSH key</option>
+              <option value="existing-key">Use existing SSH key</option>
+            </select>
+          </div>
+
+          <div class="button-group">
+            <button type="submit">Create Droplet</button>
+            <button type="button" id="do-advanced-settings">Advanced Settings</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Creation Log</h2>
+      <div class="log-window" id="log-window">
+        <p class="log-info">System ready. Select a cloud provider and configure your instance.</p>
+      </div>
+    </div>
+
+    <div class="card instance-list">
+      <h2>My Instances</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Provider</th>
+            <th>Type/Size</th>
+            <th>Region</th>
+            <th>Status</th>
+            <th>IP Address</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="instance-table">
+          <tr>
+            <td>demo-web-server</td>
+            <td>AWS</td>
+            <td>t2.micro</td>
+            <td>us-east-1</td>
+            <td><span class="badge badge-success">Running</span></td>
+            <td>54.235.12.98</td>
+            <td>
+              <button class="action-button">Stop</button>
+              <button class="action-button">Reboot</button>
+              <button class="action-button">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>db-server</td>
+            <td>GCP</td>
+            <td>e2-medium</td>
+            <td>us-central1-a</td>
+            <td><span class="badge badge-warning">Starting</span></td>
+            <td>35.184.112.45</td>
+            <td>
+              <button class="action-button" disabled>Stop</button>
+              <button class="action-button" disabled>Reboot</button>
+              <button class="action-button">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching functionality
+    const tabButtons = document.querySelectorAll('.provider-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Remove active class from all tabs
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        button.classList.add('active');
+        const tabId = `${button.dataset.tab}-tab`;
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // Log window functionality
+    const logWindow = document.getElementById('log-window');
+    
+    function addLog(message, type = 'info') {
+      const logEntry = document.createElement('p');
+      logEntry.classList.add(`log-${type}`);
+      logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logWindow.appendChild(logEntry);
+      logWindow.scrollTop = logWindow.scrollHeight;
+    }
+
+    // Form submission handling
+    const forms = {
+      'aws-form': document.getElementById('aws-form'),
+      'gcp-form': document.getElementById('gcp-form'),
+      'azure-form': document.getElementById('azure-form'),
+      'do-form': document.getElementById('do-form')
+    };
+
+    Object.entries(forms).forEach(([formId, form]) => {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const provider = formId.split('-')[0].toUpperCase();
+        const formData = new FormData(form);
+        const formValues = {};
+        
+        for (const [key, value] of formData.entries()) {
+          formValues[key] = value;
+        }
+        
+        // Extract instance name from the appropriate field based on provider
+        let instanceName = '';
+        switch (provider) {
+          case 'AWS':
+            instanceName = document.getElementById('aws-instance-name').value;
+            break;
+          case 'GCP':
+            instanceName = document.getElementById('gcp-instance-name').value;
+            break;
+          case 'AZURE':
+            instanceName = document.getElementById('azure-vm-name').value;
+            break;
+          case 'DO':
+            instanceName = document.getElementById('do-name').value;
+            break;
+        }
+
+        // Show notification and log
+        const notification = document.getElementById('notification');
+        notification.className = 'notification success';
+        notification.textContent = `Creating ${provider} instance "${instanceName}"...`;
+        
+        addLog(`Starting ${provider} instance creation: "${instanceName}"`, 'info');
+        
+        // Simulate API call
+        simulateInstanceCreation(provider, instanceName);
+      });
+    });
+
+    // Resource group selection handling (Azure)
+    document.getElementById('azure-resource-group').addEventListener('change', function() {
+      const newResourceGroupField = document.getElementById('azure-new-resource-group');
+      if (this.value === 'create-new') {
+        newResourceGroupField.style.display = 'block';
+      } else {
+        newResourceGroupField.style.display = 'none';
+      }
+    });
+
+    // Simulate instance creation
+    function simulateInstanceCreation(provider, instanceName) {
+      // Log steps
+      addLog(`Validating ${provider} credentials...`, 'info');
+      
+      setTimeout(() => {
+        addLog(`Credentials validated successfully`, 'success');
+        addLog(`Creating ${provider} instance with name "${instanceName}"...`, 'info');
+        
+        setTimeout(() => {
+          addLog(`Allocating resources...`, 'info');
+          
+          setTimeout(() => {
+            addLog(`Setting up security configurations...`, 'info');
+            
+            setTimeout(() => {
+              // Random success or occasional failure for demo
+              const success = Math.random() > 0.2;
+              
+              if (success) {
+                addLog(`Instance "${instanceName}" created successfully!`, 'success');
+                addLog(`Assigning public IP address...`, 'info');
+                
+                setTimeout(() => {
+                  const ip = generateRandomIP();
+                  addLog(`Public IP ${ip} assigned to instance "${instanceName}"`, 'success');
+                  
+                  // Add instance to table
+                  addInstanceToTable(instanceName, provider, ip);
+                  
+                  // Update notification
+                  const notification = document.getElementById('notification');
+                  notification.className = 'notification success';
+                  notification.textContent = `Instance "${instanceName}" created successfully!`;
+                }, 1500);
+              } else {
+                // Simulate a failure
+                addLog(`Error: Failed to create instance "${instanceName}". Insufficient quota.`, 'error');
+                
+                // Update notification
+                const notification = document.getElementById('notification');
+                notification.className = 'notification error';
+                notification.textContent = `Failed to create instance "${instanceName}". Please check logs for details.`;
+              }
+            }, 1800);
+          }, 1500);
+        }, 1200);
+      }, 1000);
+    }
+
+    // Generate random IP for demo
+    function generateRandomIP() {
+      return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+    }
+
+    // Add instance to table
+    function addInstanceToTable(name, provider, ip) {
+      const table = document.getElementById('instance-table');
+      const row = document.createElement('tr');
+      
+      // Get type/size and region based on provider
+      let type, region;
+      switch (provider) {
+        case 'AWS':
+          type = document.getElementById('aws-instance-type').value;
+          region = document.getElementById('aws-region').value;
+          break;
+        case 'GCP':
+          type = document.getElementById('gcp-machine-type').value;
+          region = document.getElementById('gcp-zone').value;
+          break;
+        case 'AZURE':
+          type = document.getElementById('azure-vm-size').value;
+          region = document.getElementById('azure-region').value;
+          break;
+        case 'DO':
+          type = document.getElementById('do-size').value;
+          region = document.getElementById('do-region').value;
+          break;
+      }
+      
+      row.innerHTML = `
+        <td>${name}</td>
+        <td>${provider}</td>
+        <td>${type}</td>
+        <td>${region}</td>
+        <td><span class="badge badge-success">Running</span></td>
+        <td>${ip}</td>
+        <td>
+          <button class="action-button">Stop</button>
+          <button class="action-button">Reboot</button>
+          <button class="action-button">Delete</button>
+        </td>
+      `;
+      
+      // Add action event handlers
+      const actionButtons = row.querySelectorAll('.action-button');
+      actionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const action = this.textContent.toLowerCase();
+          handleInstanceAction(name, provider, action);
+        });
+      });
+      
+      table.appendChild(row);
+    }
+
+    // Handle instance actions (stop, reboot, delete)
+    // Handle instance actions (stop, reboot, delete)
+function handleInstanceAction(instanceName, provider, action) {
+  addLog(`${action.charAt(0).toUpperCase() + action.slice(1)}ing instance "${instanceName}"...`, 'info');
+  
+  setTimeout(() => {
+    switch (action) {
+      case 'stop':
+        addLog(`Successfully stopped instance "${instanceName}"`, 'success');
+        updateInstanceStatus(instanceName, 'Stopped');
+        break;
+      case 'reboot':
+        addLog(`Rebooting instance "${instanceName}"...`, 'info');
+        
+        setTimeout(() => {
+          addLog(`Instance "${instanceName}" restarted successfully`, 'success');
+        }, 2000);
+        break;
+      case 'delete':
+        addLog(`Deleting instance "${instanceName}"...`, 'warning');
+        
+        setTimeout(() => {
+          addLog(`Instance "${instanceName}" deleted successfully`, 'success');
+          removeInstanceFromTable(instanceName);
+        }, 1500);
+        break;
+    }
+  }, 1000);
+}
+
+// Update instance status in the table
+function updateInstanceStatus(instanceName, status) {
+  const rows = document.querySelectorAll('#instance-table tr');
+  
+  rows.forEach(row => {
+    const nameCell = row.querySelector('td:first-child');
+    if (nameCell && nameCell.textContent === instanceName) {
+      const statusCell = row.querySelector('td:nth-child(5) .badge');
+      
+      // Remove existing status classes
+      statusCell.classList.remove('badge-success', 'badge-warning', 'badge-danger');
+      
+      // Add appropriate status class
+      switch (status) {
+        case 'Running':
+          statusCell.classList.add('badge-success');
+          break;
+        case 'Stopped':
+          statusCell.classList.add('badge-danger');
+          break;
+        case 'Starting':
+        case 'Stopping':
+          statusCell.classList.add('badge-warning');
+          break;
+      }
+      
+      // Update text
+      statusCell.textContent = status;
+      
+      // Update action buttons
+      const actionButtons = row.querySelectorAll('.action-button');
+      if (status === 'Running') {
+        actionButtons[0].textContent = 'Stop';
+        actionButtons[0].disabled = false;
+        actionButtons[1].disabled = false;
+      } else if (status === 'Stopped') {
+        actionButtons[0].textContent = 'Start';
+        actionButtons[0].disabled = false;
+        actionButtons[1].disabled = true;
+      } else {
+        actionButtons[0].disabled = true;
+        actionButtons[1].disabled = true;
+      }
+    }
+  });
+}
+
+// Remove instance from table
+function removeInstanceFromTable(instanceName) {
+  const rows = document.querySelectorAll('#instance-table tr');
+  
+  rows.forEach(row => {
+    const nameCell = row.querySelector('td:first-child');
+    if (nameCell && nameCell.textContent === instanceName) {
+      row.remove();
+    }
+  });
+}
+
+// Advanced settings buttons
+document.getElementById('aws-advanced-settings').addEventListener('click', function() {
+  addLog('Opening AWS advanced settings panel...', 'info');
+  alert('Advanced settings for AWS will be available in the next update.');
+});
+
+document.getElementById('gcp-advanced-settings').addEventListener('click', function() {
+  addLog('Opening GCP advanced settings panel...', 'info');
+  alert('Advanced settings for Google Cloud Platform will be available in the next update.');
+});
+
+document.getElementById('azure-advanced-settings').addEventListener('click', function() {
+  addLog('Opening Azure advanced settings panel...', 'info');
+  alert('Advanced settings for Azure will be available in the next update.');
+});
+
+document.getElementById('do-advanced-settings').addEventListener('click', function() {
+  addLog('Opening DigitalOcean advanced settings panel...', 'info');
+  alert('Advanced settings for DigitalOcean will be available in the next update.');
+});
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+  // Set up resource group visibility for Azure
+  const resourceGroupSelect = document.getElementById('azure-resource-group');
+  const newResourceGroupField = document.getElementById('azure-new-resource-group');
+  
+  if (resourceGroupSelect.value === 'create-new') {
+    newResourceGroupField.style.display = 'block';
+  } else {
+    newResourceGroupField.style.display = 'none';
+  }
+
+  // Add event handlers for existing instance action buttons
+  const existingActionButtons = document.querySelectorAll('#instance-table .action-button');
+  existingActionButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const action = this.textContent.toLowerCase();
+      const row = this.closest('tr');
+      const instanceName = row.querySelector('td:first-child').textContent;
+      const provider = row.querySelector('td:nth-child(2)').textContent;
+      
+      handleInstanceAction(instanceName, provider, action);
+    });
+  });
+
+  // Add welcome log
+  addLog('Cloud Instance Creator initialized. Ready to create new instances.', 'info');
+});
+// Add any additional zones when a region is selected (GCP specific)
+document.getElementById('gcp-region').addEventListener('change', function() {
+  const region = this.value;
+  const zoneSelect = document.getElementById('gcp-zone');
+  
+  // Clear existing options
+  zoneSelect.innerHTML = '';
+  
+  // Add new zone options based on selected region
+  if (region === 'us-central1') {
+    ['us-central1-a', 'us-central1-b', 'us-central1-c', 'us-central1-f'].forEach(zone => {
+      const option = document.createElement('option');
+      option.value = zone;
+      option.textContent = zone;
+      zoneSelect.appendChild(option);
+    });
+  } else if (region === 'us-east1') {
+    ['us-east1-b', 'us-east1-c', 'us-east1-d'].forEach(zone => {
+      const option = document.createElement('option');
+      option.value = zone;
+      option.textContent = zone;
+      zoneSelect.appendChild(option);
+    });
+  } 
+  // Add more regions as needed
+});
+
+// Enable periodic status refresh for instances
+function startStatusRefresh() {
+  setInterval(() => {
+    // In a real app, this would call an API to get current instance statuses
+    // For demo purposes, we'll just log a message
+    console.log('Refreshing instance statuses...');
+  }, 30000); // Refresh every 30 seconds
+}
+
+// Start the refresh cycle
+startStatusRefresh();
+</script>
+</body>
+</html>

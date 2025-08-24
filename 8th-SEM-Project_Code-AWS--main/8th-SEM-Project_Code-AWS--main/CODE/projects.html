@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Projects</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --danger-color: #ea4335;
+            --warning-color: #fbbc05;
+            --dark-bg: #1a1a1a;
+            --light-bg: #f8f9fa;
+            --text-light: #f8f9fa;
+            --text-dark: #202124;
+            --border-color: #dadce0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            padding: 20px 0;
+            height: 100%;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            list-style: none;
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-item.active {
+            background-color: rgba(66, 133, 244, 0.2);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 500;
+        }
+        
+        .time-display {
+            font-size: 16px;
+            color: #5f6368;
+        }
+        
+        .button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .primary-button {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .primary-button:hover {
+            background-color: #3367d6;
+        }
+        
+        .projects-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .project-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            padding: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .project-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        
+        .project-template {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            background-color: rgba(66, 133, 244, 0.2);
+            color: var(--primary-color);
+        }
+        
+        .project-details {
+            margin-bottom: 15px;
+        }
+        
+        .project-detail {
+            display: flex;
+            margin-bottom: 5px;
+        }
+        
+        .detail-label {
+            width: 100px;
+            font-weight: 500;
+            color: #5f6368;
+        }
+        
+        .detail-value {
+            flex: 1;
+        }
+        
+        .project-cost {
+            text-align: right;
+            font-weight: 600;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        .project-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .action-button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .view-button {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .edit-button {
+            background-color: var(--warning-color);
+            color: var(--text-dark);
+        }
+        
+        .delete-button {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px 0;
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            color: #dadce0;
+            margin-bottom: 20px;
+        }
+        
+        .empty-text {
+            font-size: 18px;
+            color: #5f6368;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-cloud"></i>
+                <div class="logo-text">Cloud Project</div>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard.html" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="new-project-page.html" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>New Projects</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <i class="fas fa-folder"></i>
+                    <span>Projects</span>
+                </li>
+                <li class="nav-item">
+                    <i class="fas fa-server"></i>
+                    <span>Instances</span>
+                </li>
+                <li class="nav-item">
+                    <i class="fas fa-database"></i>
+                    <span>Storage</span>
+                </li>
+                <li class="nav-item">
+                    <i class="fas fa-network-wired"></i>
+                    <span>Network</span>
+                </li>
+                <li class="nav-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Security</span>
+                </li>
+                <li class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Monitoring</span>
+                </li>
+                <li class="nav-item">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Billing</span>
+                </li>
+                <li class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </li>
+                <li class="nav-item">
+                    <i class="fas fa-headset"></i>
+                    <span>Support</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="header">
+                <h1>My Projects</h1>
+                <div class="time-display" id="current-time">Loading...</div>
+            </div>
+
+            <div class="buttons-container" style="margin-bottom: 20px;">
+                <button class="primary-button" onclick="window.location.href='new-project-page.html'">
+                    <i class="fas fa-plus"></i> Create New Project
+                </button>
+            </div>
+
+            <div class="projects-container" id="projects-container">
+                <!-- Projects will be populated here via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('current-time').textContent = now.toLocaleDateString('en-US', options);
+        }
+        
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        // Load projects from localStorage
+        function loadProjects() {
+            const projectsContainer = document.getElementById('projects-container');
+            const projects = JSON.parse(localStorage.getItem('cloudProjects') || '[]');
+            
+            if (projects.length === 0) {
+                // Show empty state
+                projectsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <div class="empty-text">You haven't created any projects yet</div>
+                        <button class="primary-button" onclick="window.location.href='new-project.html'">
+                            Create Your First Project
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Clear container
+            projectsContainer.innerHTML = '';
+            
+            // Add projects
+            projects.forEach((project, index) => {
+                const projectCard = document.createElement('div');
+                projectCard.className = 'project-card';
+                
+                // Get template display name
+                let templateName = 'Unknown';
+                switch(project.template) {
+                    case 'web-app': templateName = 'Web Application'; break;
+                    case 'data-warehouse': templateName = 'Data Warehouse'; break;
+                    case 'microservices': templateName = 'Microservices'; break;
+                    case 'ml-ai': templateName = 'Machine Learning'; break;
+                    case 'iot': templateName = 'IoT Platform'; break;
+                    case 'blank': templateName = 'Blank Project'; break;
+                }
+                
+                // Get region display name
+                let regionName = 'Unknown';
+                switch(project.region) {
+                    case 'us-east': regionName = 'US East (Virginia)'; break;
+                    case 'us-west': regionName = 'US West (Oregon)'; break;
+                    case 'eu-west': regionName = 'Europe West (Ireland)'; break;
+                    case 'asia-east': regionName = 'Asia East (Taiwan)'; break;
+                    case 'asia-south': regionName = 'Asia South (Mumbai)'; break;
+                }
+                
+                // Services list
+                const services = [];
+                if (project.services) {
+                    if (project.services.loadBalancer) services.push('Load Balancer');
+                    if (project.services.autoScaling) services.push('Auto Scaling');
+                    if (project.services.database) services.push('Managed Database');
+                    if (project.services.backup) services.push('Automated Backups');
+                    if (project.services.monitoring) services.push('Advanced Monitoring');
+                }
+                
+                // Create date object from ISO string
+                const createdDate = project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'Unknown';
+                
+                projectCard.innerHTML = `
+                    <div class="project-header">
+                        <div class="project-title">${project.name}</div>
+                        <div class="project-template">${templateName}</div>
+                    </div>
+                    <div class="project-details">
+                        <div class="project-detail">
+                            <div class="detail-label">Project ID:</div>
+                            <div class="detail-value">${project.id}</div>
+                        </div>
+                        <div class="project-detail">
+                            <div class="detail-label">Region:</div>
+                            <div class="detail-value">${regionName}</div>
+                        </div>
+                        <div class="project-detail">
+                            <div class="detail-label">Created:</div>
+                            <div class="detail-value">${createdDate}</div>
+                        </div>
+                        <div class="project-detail">
+                            <div class="detail-label">Services:</div>
+                            <div class="detail-value">${services.length ? services.join(', ') : 'None'}</div>
+                        </div>
+                    </div>
+                    <div class="project-cost">
+                        ${project.cost || '$0.00'}
+                    </div>
+                    <div class="project-actions">
+                        <button class="action-button delete-button" onclick="deleteProject(${index})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                `;
+                
+                projectsContainer.appendChild(projectCard);
+            });
+        }
+        
+        // Delete project
+        function deleteProject(index) {
+            if (confirm('Are you sure you want to delete this project?')) {
+                const projects = JSON.parse(localStorage.getItem('cloudProjects') || '[]');
+                projects.splice(index, 1);
+                localStorage.setItem('cloudProjects', JSON.stringify(projects));
+                loadProjects();
+            }
+        }
+        
+        // Load projects when the page loads
+        window.addEventListener('load', loadProjects);
+    </script>
+</body>
+</html>

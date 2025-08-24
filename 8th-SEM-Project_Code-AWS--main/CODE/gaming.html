@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome - Gaming Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f5f7fa;
+            color: #333333;
+            overflow-x: hidden;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .page.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* Header & Navigation */
+        header {
+            background: #2c3e50;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #3498db;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(52, 152, 219, 0.2);
+        }
+
+        .nav-link.active {
+            color: #3498db;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-button {
+            background: #3498db;
+            color: white;
+            font-size: 0.9em;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .auth-button.secondary {
+            background: transparent;
+            border: 1px solid #3498db;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background: #2980b9;
+        }
+
+        .auth-button.secondary:hover {
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        /* Welcome Page Styles */
+        .welcome-page {
+            flex-direction: column;
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+            color: #ffffff;
+            padding-top: 80px;
+        }
+
+        .hero-section {
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px 60px 20px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .hero-title {
+            font-size: 3.5em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5em;
+            color: #ecf0f1;
+            margin-bottom: 40px;
+            line-height: 1.4;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            background: #3498db;
+            color: white;
+            font-size: 1.1em;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 500;
+            margin-top: 20px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(52, 152, 219, 0.2);
+            background: #2980b9;
+        }
+
+        /* Gaming Section Styles */
+        .gaming-section {
+            background: #1a252f;
+            padding: 80px 20px;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .section-subtitle {
+            color: #bdc3c7;
+            font-size: 1.2em;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .game-category {
+            margin-bottom: 80px;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .category-title {
+            font-size: the1.8em;
+            color: #3498db;
+        }
+
+        .view-all {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .view-all:hover {
+            color: #2ecc71;
+        }
+
+        .view-all span {
+            margin-left: 5px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .game-card {
+            background: #2c3e50;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .game-content {
+            padding: 20px;
+        }
+
+        .game-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #ecf0f1;
+        }
+
+        .game-description {
+            color: #bdc3c7;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .game-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .game-rating {
+            display: flex;
+            align-items: center;
+            color: #f1c40f;
+            font-weight: 500;
+        }
+
+        .game-rating span {
+            margin-left: 5px;
+        }
+
+        .game-genre {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .game-button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .game-button:hover {
+            background: #2980b9;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 80px 20px;
+            background: #2c3e50;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: #34495e;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 1px solid #3a536b;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+            color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+            width: 80px;
+            height: 80px;
+            line-height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 20px auto;
+        }
+
+        .feature-title {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            color: #ecf0f1;
+        }
+
+        .feature-description {
+            color: #bdc3c7;
+            line-height: 1.6;
+        }
+
+        /* Registration Page Styles */
+        .registration-page, .login-page {
+            align-items: center;
+            justify-content: center;
+            padding: 120px 20px 40px 20px;
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 40px;
+            background: #34495e;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid #3a536b;
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.2em;
+            color: #ecf0f1;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        label {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            background: #2c3e50;
+            border: 1px solid #3a536b;
+            border-radius: 12px;
+            color: #ecf0f1;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3498db;
+            background: #2c3e50;
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+        }
+
+        input:focus + label,
+        input:not(:placeholder-shown) + label {
+            top: 0;
+            left: 12px;
+            font-size: 12px;
+            padding: 0 4px;
+            background: #34495e;
+            color: #3498db;
+        }
+
+        .form-button {
+            width: 100%;
+            padding: 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 1em;
+        }
+
+        .form-button:hover {
+            background: #2980b9;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #bdc3c7;
+        }
+
+        .form-footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .contributors {
+            margin-top: 40px;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #3a536b;
+        }
+
+        .contributors-title {
+            margin-bottom: 15px;
+            color: #ecf0f1;
+            font-size: 1.1em;
+        }
+
+        .contributors-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .contributor {
+            background: #2c3e50;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #bdc3c7;
+        }
+
+        /* Footer Section */
+        footer {
+            padding: 60px 20px 30px 20px;
+            background: #1a252f;
+            color: #bdc3c7;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-column h3 {
+            color: #ecf0f1;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 12px;
+        }
+
+        .footer-column ul li a {
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-column ul li a:hover {
+            color: #3498db;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-link {
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-size: 1.5em;
+        }
+
+        .social-link:hover {
+            color: #3498db;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 30px;
+            border-top: 1px solid #34495e;
+            color: #7f8c8d;
+        }
+
+        /* Notifications and Loading */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            background: #34495e;
+            color: #ecf0f1;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: none;
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 37, 47, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(52, 152, 219, 0.1);
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .auth-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .hero-title {
+                font-size: 2.5em;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2em;
+            }
+            
+            .section-title {
+                font-size: 2em;
+            }
+            
+            .category-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="navbar">
+            <a href="#" class="logo">Game<span>Hub</span></a>
+            
+            <div class="nav-links">
+                <a href="#" class="nav-link active">Home</a>
+                <a href="#" class="nav-link">Games</a>
+                <a href="#" class="nav-link">Community</a>
+                <a href="#" class="nav-link">Support</a>
+            </div>
+            
+            <div class="auth-buttons">
+                <button class="auth-button secondary" onclick="navigateToPage('loginPage')">Login</button>
+                <button class="auth-button" onclick="navigateToPage('registrationPage')">Sign Up</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Welcome Page -->
+    <div class="page welcome-page active" id="welcomePage">
+        <div class="hero-section">
+            <h1 class="hero-title">Level Up Your Gaming Experience</h1>
+            <p class="hero-subtitle">Join our growing community of gamers and experience the next generation of gaming. Discover, connect, and dominate across all platforms.</p>
+            <button class="cta-button" onclick="navigateToPage('registrationPage')">Start Your Journey</button>
+        </div>
+        
+        <!-- Gaming Section -->
+        <section class="gaming-section">
+            <div class="section-container">
+                <div class="section-header">
+                    <h2 class="section-title">Featured Games</h2>
+                    <p class="section-subtitle">Explore our curated selection of games across different categories. From action-packed adventures to strategic challenges, find your next gaming obsession.</p>
+                </div>
+                
+                <!-- Action Games Category -->
+                <div class="game-category">
+                    <div class="category-header">
+                        <h3 class="category-title">Action Games</h3>
+                        <a href="#" class="view-all">View All <span>→</span></a>
+                    </div>
+                    
+                    <div class="games-grid">
+                        <div class="game-card">
+                            <img src="https://th.bing.com/th?id=OIP.QuD3dQ44BKuCbC7RCnQ9ZAHaHa&w=200&h=200&c=9&rs=1&qlt=99&o=6&dpr=1.3&pid=23.1" alt="Cybernetic Shadows" class="game-img">
+                            <div class="game-content">
+                                <h4 class="game-title">Subway Surfers</h4>
+                                <p class="game-description">Immerse yourself in a dystopian future where cybernetic enhancements and corporate warfare define society.</p>
+                                <div class="game-meta">
+                                    <div class="game-rating">★★★★☆ <span>4.7</span></div>
+                                    <div class="game-genre">Running </div>
+                                </div>
+                                <a href="https://poki.com/en/g/subway-surfers" target="_blank">
+                                    <button class="game-button">Play Now</button>
+                                </a>
+                    
+                            </div>
+                        </div>
+                        
+                        <div class="game-card">
+                            <img src="/api/placeholder/400/320" alt="Apex Legends" class="game-img">
+                            <div class="game-content">
+                                <h4 class="game-title">Apex Predators</h4>
+                                <p class="game-description">A battle royale where legendary competitors battle for glory, fame, and fortune on the edges of the Frontier.</p>
+                                <div class="game-meta">
+                                    <div class="game-rating">★★★★★ <span>4.9</span></div>
+                                    <div class="game-genre">Battle Royale</div>
+                                </div>
+                                <button class="game-button">Play Now</button>
+                            </div>
+                        </div>
+                        
+                        <div class="game-card">
+                            <img src="/api/placeholder/400/320" alt="Crimson Protocol" class="game-img">
+                            <div class="game-content">
+                                <h4 class="game-title">Crimson Protocol</h4>
+                                <p class="game-description">Join an elite squad tasked with containing supernatural threats that endanger humanity's existence.</p>
+                                <div class="game-meta">
+                                    <div class="game-rating">★★★★☆ <span>4.5</span></div>
+                                    <div class="game-genre">Tactical Shooter</div>
+                                </div>
+                                <button class="game-button">Play Now</button>
+                            </div>
+                        </div>
+                        
+                        <div class="game-card">
+                            <img src="/api/placeholder/400/320" alt="Neon Samurai" class="game-img">
+                            <div class="game-content">
+                                <h4 class="game-title">Neon Samurai</h4>
+                                <p class="game-description">Slice through enemies with lightning-fast reflexes in this cyberpunk action game with a Japanese aesthetic.</p>
+                                <div class="game-meta">
+                                    <div class="game-rating">★★★★☆ <span>4.6</span></div>
+                                    <div class="game-genre">Hack & Slash</div>
+                                </div>
+                                <button class="game-button">Play Now</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Strategy Games Category -->
+                <div class="game-category">
+                    <div class="category-header">
+                        <h3 class="category-title">Strategy Games</h3>
+                        <a href="#" class="view-all">View All <span>→</span></a>
+                    </div>
+                    
+                    <div class="games-grid">
+                        <div class="game-card">
+                            <img src="/api/placeholder/400/320" alt="Galactic Dominion" class="game-img">
+                            <div class="game-content">
+                                <h4 class="game-title">Galactic Dominion</h4>
+                                <p class="game-description">Build your space empire, manage resources, and conquer the stars in this epic 4X strategy game.</p>
+                                <div class="game-meta">
+                                    <div class="game-rating">★★★★☆ <span>4.8</span></div>
+                                    <div class="game-genre">4X Strategy</div>
+                                </div>
+                                <button class="game-button">Play Now</button>
+                            </div>
+                        </div>
+                        
+                        <div class="game-card">
+                            <img src="/api/placeholder/400/320" alt="Kingdom Architect" class="game-img">
+                            <div class="game-content">
+                                <h4 class="game-title">Kingdom Architect</h4>
+                                <p class="game-description">Design, build and manage your medieval kingdom while defending against rival monarchs and mythical threats.</p>
+                                <div class="game-meta">
+                                    <div class="game-rating">★★★★☆ <span>4.6</span></div>
+                                    <div class="game-genre">City Builder</div>
+                                </div>
+                                <button class="game-button">Play Now</button>
+                            </div>
+                        </div>
+                        
+                        <div class="game-card">
+                            <img src="/api/placeholder/400/320" alt="War Command" class="game-img">
+                            <div class="game-content">
+                                <h4 class="game-title">War Command</h4>
+                                <p class="game-description">Lead armies through historical battles with accurate units, terrain advantages, and tactical maneuvers.</p>
+                                <div class="game-meta">
+                                    <div class="game-rating">★★★★☆ <span>4.5</span></div>
+                                    <div class="game-genre">RTS</div>
+                                </div>
+                                <button class="game-button">Play Now</button>
+                            </div>
+                        </div>
+                        
+                        <div class="game-card">
+                            <img src="/api/placeholder/400/320" alt="Chess Masters" class="game-img">
+                            <div class="game-content">
+                                <h4 class="game-title">Chess Masters Pro</h4>
+                                <p class="game-description">Experience chess like never before with AI opponents that adapt to your skill level and playing style.</p>
+                                <div class="game-meta">
+                                    <div class="game-rating">★★★★★ <span>4.9</span></div>
+                                    <div class="game-genre">Board Game</div>
+                                </div>
+                                <button class="game-button">Play Now</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RPG Games Category -->
+                <div class="game-category">
+                    <div class="category-header">
+                        <h3 class="category-title">Role-Playing Games</h3>
+                        <a href="#" class="view-all">View All <span>→</span></a>
+                    </div>
+                    
+                    <div class="games-grid">
+                        <div class="game-card">
+                            <img src="/api/placeholder/400/320" alt="Mythic Realms" class="game-img">
+                            <div class="game-content">
+                                <h4 class="game-title">Mythic Realms</h4>
+                                <p class="game-description">Embark on an epic journey through a vast open world filled with magic, monsters, and ancient mysteries.</p>
+                                <div class="game-meta">
+                                    <div class="game-rating">★★★★★ <span>5.0</span></div>
+                                    <div class="game-genre">Open World RPG</div>
+                                </div>
+                                <button class="game-button">Play Now</button>
+                            </div>
+                        </div>
+                        
+                        <div class="game-card">
+                            <img src="/api/placeholder/400/320" alt="Stellar Odyssey" class="game-img">
+                            <div class="game-content">
+                                <h4 class="game-title">Stellar Odyssey</h4>
+                                <p class="game-description">Navigate the cosmos as a space explorer, making critical choices that shape the fate of entire star systems.</p>
+                                <div class="game-meta">
+                                    <div class="game-rating">★★★★☆ <span>4.7</span></div>
+                                    <div class="game-genre">Space RPG</div>
+                                </div>
+                                <button class="game-button">Play Now</button>
+                            </div>
+                        </div>
+                        
+                        <div class="game-card">
+                            <img src="/api/placeholder/400/320" alt="Arcane Legacy" class="game-img">
+                            <div class="game-content">
+                                <h4 class="game-title">Arcane Legacy</h4>
+                                <p class="game-description">Master magical disciplines and uncover your mysterious past in a world where spell-casting defines society.</p>
+                                <div class="game-meta">
+                                    <div class="game-rating">★★★★☆ <span>4.6</span></div>
+                                    <div class="game-genre">Magic RPG</div>
+                                </div>
+                                <button class="game-button">Play Now</button>
+                            </div>
+                        </div>
+                        
+                        <div class="game-card">
+                            <img src="/api/placeholder/400/320" alt="Dark Chronicles" class="game-img">
+                            <div class="game-content">
+                                <h4 class="game-title">Dark Chronicles</h4>
+                                <p class="game-description">Face your fears in this gothic horror RPG where your sanity is as important as your combat abilities.</p>
+                                <div class="game-meta">
+                                    <div class="game-rating">★★★★☆ <span>4.8</span></div>
+                                    <div class="game-genre">Gothic RPG</div>
+                                </div>
+                                <button class="game-button">Play Now</button>
+                            </div>
+                        </div>
+                    </div>
